@@ -8,6 +8,9 @@
 <meta property="og:title" content="Kristian Kobescak — AI systems with inspectable controls">
 <meta property="og:description" content="Eval gates committed before code, audit trails on every run, independent verification from fresh public clones.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://kobescak-kristian.github.io/">
+<meta property="og:image" content="https://kobescak-kristian.github.io/og-image.png">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -342,10 +345,10 @@
     </div>
 
     <div class="stats rv">
-      <div><div class="n display">5</div><div class="l">Engines, public &amp; audited</div></div>
-      <div><div class="n display">2×</div><div class="l">Models on every verification</div></div>
-      <div><div class="n display">100%</div><div class="l">Repos with ADRs + pre-push validation</div></div>
-      <div><div class="n display">0</div><div class="l">Failures scrubbed from the record</div></div>
+      <div><div class="n display">51</div><div class="l">Records in the flagship's committed eval run</div></div>
+      <div><div class="n display">0</div><div class="l">Invalid AI outputs reached downstream</div></div>
+      <div><div class="n display">7</div><div class="l">Failures caught &amp; safely handled</div></div>
+      <div><div class="n display">1</div><div class="l">Failed eval gate published, not hidden</div></div>
     </div>
   </header>
 
@@ -358,7 +361,7 @@
     <p class="lede rv">Not five demos — one pipeline. A decision enters on the left and leaves grounded, priced, executed, and explained. Each stage is its own public repo. Click a stage to inspect it.</p>
 
     <div class="pipeline-shell rv">
-      <div class="cap"><span>DECISION PIPELINE — LIVE ARCHITECTURE</span><span>ALL STAGES PUBLIC ON GITHUB</span></div>
+      <div class="cap"><span>DECISION PIPELINE — REFERENCE ARCHITECTURE</span><span>ALL STAGES PUBLIC ON GITHUB</span></div>
       <div class="pl">
         <button class="stage" data-card="c-reliability"><span class="k">STAGE 1</span><span class="t">Validate</span><span class="d">Block invalid AI outputs before they trigger business actions.</span></button>
         <button class="stage" data-card="c-decision"><span class="k">STAGE 2</span><span class="t">Evaluate</span><span class="d">Track outcomes, score decision correctness over time.</span></button>
@@ -374,31 +377,32 @@
   <section id="engines" class="wrap" style="padding-top:0">
     <div class="cards">
       <article class="card rv" id="c-reliability">
-        <div class="top"><span class="flag mono">FLAGSHIP</span><span class="hash">HEAD ddff88b</span></div>
+        <div class="top"><span class="flag mono">FLAGSHIP</span><span class="hash">verified @ ddff88b</span></div>
         <h3>AI Reliability Engine</h3>
-        <p>Blocks invalid AI outputs before they trigger business actions. Schema and value validation, retry and safe-default logic, confidence-threshold routing, SQLite persistence, committed eval results.</p>
-        <a class="go mono" href="https://github.com/kobescak-kristian/ai-reliability-engine">github.com/kobescak-kristian/ai-reliability-engine <span>→</span></a>
+        <p>Blocks invalid AI outputs before they trigger business actions. Schema and value validation, retry and safe-default logic, confidence-threshold routing, SQLite persistence, committed eval results: 51 records in, 7 failures caught, 0 invalid outputs downstream.</p>
+        <a class="go mono" href="case-studies/ai-reliability-engine.html" style="color:var(--stamp)">Read the case study <span>→</span></a>
+        <a class="go mono" href="https://github.com/kobescak-kristian/ai-reliability-engine" style="padding-top:2px">github.com/kobescak-kristian/ai-reliability-engine <span>→</span></a>
       </article>
       <article class="card rv" id="c-decision">
-        <div class="top"><span></span><span class="hash">HEAD f1546c2</span></div>
+        <div class="top"><span></span><span class="hash">verified @ f1546c2</span></div>
         <h3>AI Decision Engine</h3>
         <p>Tracks outcomes and evaluates decision correctness — the feedback layer that tells you whether the system's calls were right, not just whether they ran.</p>
         <a class="go mono" href="https://github.com/kobescak-kristian/ai-decision-engine">github.com/kobescak-kristian/ai-decision-engine <span>→</span></a>
       </article>
       <article class="card rv" id="c-impact">
-        <div class="top"><span></span><span class="hash">HEAD 17c4fdb</span></div>
+        <div class="top"><span></span><span class="hash">verified @ 17c4fdb</span></div>
         <h3>AI Impact Scoring Engine</h3>
         <p>Prices decisions and tunes thresholds — connects model behavior to money, so threshold changes are cost decisions instead of guesses.</p>
         <a class="go mono" href="https://github.com/kobescak-kristian/ai-impact-scoring-engine">github.com/kobescak-kristian/ai-impact-scoring-engine <span>→</span></a>
       </article>
       <article class="card rv" id="c-execution">
-        <div class="top"><span></span><span class="hash">HEAD 19285cf</span></div>
+        <div class="top"><span></span><span class="hash">verified @ 19285cf</span></div>
         <h3>AI Execution Engine</h3>
         <p>Runs the workflow: five queues and deterministic checks, so execution is inspectable step by step instead of a black box.</p>
         <a class="go mono" href="https://github.com/kobescak-kristian/ai-execution-engine">github.com/kobescak-kristian/ai-execution-engine <span>→</span></a>
       </article>
       <article class="card rv" id="c-context" style="grid-column:1 / -1">
-        <div class="top"><span></span><span class="hash">HEAD 8ad6e07</span></div>
+        <div class="top"><span></span><span class="hash">verified @ 8ad6e07</span></div>
         <h3>AI Context Engine</h3>
         <p>Grounds decisions in retrieved precedent and cites its sources — the explanation layer. Its keyed eval run failed the pre-committed gate and shipped with the failure analyzed in the open (EVAL_RESULTS.md) rather than silently re-tuned.</p>
         <a class="go mono" href="https://github.com/kobescak-kristian/ai-context-engine">github.com/kobescak-kristian/ai-context-engine <span>→</span></a>

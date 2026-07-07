@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case study: AI Reliability Engine — Kristian Kobescak</title>
+<meta name="description" content="What happens when the model is wrong: 51 records, 7 failures caught, 0 invalid outputs downstream. A case study with the real run data, the failures on display, and what the eval does not cover.">
+<meta property="og:title" content="Case study: AI Reliability Engine">
+<meta property="og:description" content="51 records, 7 failures caught, 0 invalid AI outputs reached downstream systems — with the run ID to prove it.">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F6F2;--paper-2:#ECEFE9;--card:#FFFFFF;
+    --ink:#121A16;--ink-2:#3C4842;--muted:#5E6B64;--faint:#8B968F;--rule:#D8DED8;
+    --stamp:#0C6B52;--stamp-bright:#0E8563;--stamp-soft:#E1EFE8;
+    --warn:#B4881F;--warn-soft:#F7EFDA;
+    --dark:#10201A;--dark-2:#16291F;--dark-ink:#DFE9E2;--dark-muted:#8FA79A;--dark-rule:#24382E;
+    --maxw:880px;--radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--stamp);outline-offset:3px;border-radius:3px}
+  ::selection{background:var(--stamp-soft)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  .display{font-family:"Bricolage Grotesque",sans-serif;letter-spacing:-.015em}
+
+  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--paper) 82%,transparent);border-bottom:1px solid var(--rule)}
+  .nav .in{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .nav a{font-family:"IBM Plex Mono",monospace;font-size:12.5px;text-decoration:none;color:var(--muted)}
+  .nav a:hover{color:var(--stamp)}
+  .nav .brand{color:var(--ink);letter-spacing:.05em;display:flex;align-items:center;gap:10px}
+  .nav .brand .dot{width:9px;height:9px;border-radius:3px;background:var(--stamp)}
+
+  header.case{padding:clamp(56px,9vh,96px) 0 clamp(36px,5vh,56px)}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;color:var(--stamp)}
+  header.case h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(34px,5.6vw,60px);line-height:1.02;letter-spacing:-.02em;margin-top:16px;max-width:18ch}
+  .meta{display:flex;flex-wrap:wrap;gap:0;margin-top:30px;border:1px solid var(--rule);border-radius:8px;background:var(--card);overflow:hidden;font-family:"IBM Plex Mono",monospace;font-size:12px}
+  .meta span{padding:9px 14px;border-right:1px solid var(--rule);color:var(--muted)}
+  .meta span:last-child{border-right:none}
+  .meta .pass{color:var(--stamp);background:var(--stamp-soft);font-weight:500}
+
+  section{padding:clamp(30px,4.5vh,48px) 0}
+  h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:clamp(24px,3vw,32px);letter-spacing:-.015em;margin-bottom:16px}
+  p{max-width:66ch;color:var(--ink-2)}
+  p + p{margin-top:14px}
+  .dim{color:var(--muted)}
+
+  .figures{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;margin:26px 0 8px}
+  .figures div{background:var(--card);padding:22px 20px}
+  .figures .n{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(26px,3vw,38px);line-height:1}
+  .figures .l{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:9px;text-transform:uppercase}
+  .prov{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--faint);margin-top:10px}
+  @media(max-width:760px){.figures{grid-template-columns:repeat(2,1fr)}}
+
+  table{width:100%;border-collapse:collapse;margin-top:22px;background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;font-size:14.5px}
+  table{display:block;overflow-x:auto}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:top;min-width:120px}
+  th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--paper-2)}
+  tr:last-child td{border-bottom:none}
+  td .mono{font-size:13px;background:var(--paper-2);border-radius:5px;padding:2px 7px;white-space:nowrap}
+  td.err{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:#8A3B2E}
+  td.ok{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--stamp)}
+
+  .callout{background:var(--dark);color:var(--dark-ink);border-radius:var(--radius);padding:clamp(26px,4vw,40px);margin-top:26px}
+  .callout .st{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:#E5B96B;border:1px solid #E5B96B;border-radius:5px;padding:4px 9px;display:inline-block;transform:rotate(-1.2deg)}
+  .callout blockquote{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:clamp(18px,2.1vw,23px);line-height:1.45;margin-top:16px;letter-spacing:-.01em}
+  .callout .src{margin-top:12px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--dark-muted)}
+
+  .limits{border:1px dashed var(--warn);background:var(--warn-soft);border-radius:var(--radius);padding:24px 26px;margin-top:22px}
+  .limits h3{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.12em;color:var(--warn);margin-bottom:12px}
+  .limits ul{margin-left:18px;color:var(--ink-2);font-size:15px}
+  .limits li{margin-top:6px}
+
+  .adr{border-left:3px solid var(--stamp);padding:6px 0 6px 22px;margin-top:22px}
+  .adr .t{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--stamp);letter-spacing:.08em}
+  .adr p{margin-top:8px}
+
+  .cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+  .btn{text-decoration:none;font-weight:600;font-size:15px;padding:13px 22px;border-radius:10px;transition:transform .18s}
+  .btn.pri{background:var(--ink);color:var(--paper)}
+  .btn.pri:hover{transform:translateY(-2px)}
+  .btn.sec{border:1px solid var(--rule);background:var(--card)}
+  .btn.sec:hover{border-color:var(--ink)}
+
+  footer{padding:44px 0 60px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12.5px;border-top:1px solid var(--rule);margin-top:40px}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap in">
+    <a class="brand" href="../index.html"><span class="dot"></span>KRISTIAN KOBESCAK</a>
+    <a href="../index.html">&larr; back to site</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<header class="case">
+  <span class="kicker mono">CASE STUDY · FLAGSHIP · AI RELIABILITY ENGINE</span>
+  <h1 class="display">What happens when the model is wrong.</h1>
+  <div class="meta mono">
+    <span>run_20260704_031434_8cda36</span>
+    <span>2026-07-04 · fresh clone · exit 0</span>
+    <span class="pass">REPRODUCIBLE — NO API KEY NEEDED</span>
+  </div>
+</header>
+
+<section>
+  <h2>The problem</h2>
+  <p>AI classification is useful — and probabilistic. The model can return a category that doesn't exist, a confidence score outside 0–1, an empty required field, or nothing at all. Downstream operational systems are not forgiving: a wrong routing decision reaches a sales team, a CRM, or a support queue before anyone notices.</p>
+  <p>Most AI workflow demos stop at classification. This system is built for the other case — <strong>what happens when the model is wrong.</strong></p>
+</section>
+
+<section>
+  <h2>What was built</h2>
+  <p>An 8-stage pipeline that sits between an AI classifier and operational systems: input sanitisation → AI call → strict schema validation → retry with a strict prompt → safe-default fallback → threshold routing → alerting → SQLite audit trail. No field from the AI response is trusted until it passes validation, and every decision — including every failure — is persisted under a traceable run ID.</p>
+</section>
+
+<section>
+  <h2>The run</h2>
+  <p>The numbers below are not projections. They are observed values from a live run of the committed eval set — reproducible by anyone, from a fresh clone, without an API key (simulation mode uses pre-seeded responses).</p>
+  <div class="figures">
+    <div><div class="n display">51</div><div class="l">Records in, incl. deliberate edge cases</div></div>
+    <div><div class="n display">0</div><div class="l">Invalid AI outputs reached downstream</div></div>
+    <div><div class="n display">7</div><div class="l">Failures caught &amp; safely handled</div></div>
+    <div><div class="n display">100%</div><div class="l">Decisions traceable by run ID</div></div>
+  </div>
+  <p class="prov">Source: evals/EVAL_RESULTS.md · decision distribution: 22 send_to_sales · 19 manual_review · 10 archive · 19 alerts queued</p>
+</section>
+
+<section>
+  <h2>The failures, on display</h2>
+  <p>Three records in the test set are deliberately poisoned — each seeds a real, observed LLM failure mode. All three were caught by the validator, failed their strict-prompt retry, received the safe default, and routed to human review. None touched a downstream system.</p>
+  <table>
+    <thead><tr><th>Record</th><th>Injected fault</th><th>Validator error (verbatim, observed)</th><th>Outcome</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="mono">lead_037</span></td>
+        <td>Category that doesn't exist</td>
+        <td class="err">Invalid category 'maybe_value' — must be one of {'high_value', 'low_value', 'unknown'}</td>
+        <td class="ok">caught → safe default → manual_review</td>
+      </tr>
+      <tr>
+        <td><span class="mono">lead_038</span></td>
+        <td>Confidence outside 0–1</td>
+        <td class="err">Confidence out of range: -0.3 — must be 0.0–1.0</td>
+        <td class="ok">caught → safe default → manual_review</td>
+      </tr>
+      <tr>
+        <td><span class="mono">lead_039</span></td>
+        <td>Empty required field</td>
+        <td class="err">Missing or empty field: reason</td>
+        <td class="ok">caught → safe default → manual_review</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top:16px" class="dim">Four more records with no usable AI response — empty, whitespace-only, too-short, or unseeded input — also flowed through fallback to human review: seven failures handled in total. The sanitiser separately stripped injected script tags <em>and their contents</em> from two records before the AI was ever called.</p>
+</section>
+
+<section>
+  <h2>The correction the repo doesn't hide</h2>
+  <div class="callout">
+    <span class="st mono">DOCUMENTATION vs REALITY</span>
+    <blockquote>Earlier revisions of the README claimed "fallback triggered on 2 records," later "3" — both derived from reading the code. The live run observed 7. The README now states 7, and the history of being wrong is kept in EVAL_RESULTS.md.</blockquote>
+    <p class="src">The rule this encodes: documentation is corrected by runs — never the other way around.</p>
+  </div>
+</section>
+
+<section>
+  <h2>What this eval does <em>not</em> cover</h2>
+  <p>A credible eval states its own boundaries. From the committed results file, unedited in substance:</p>
+  <div class="limits">
+    <h3 class="mono">KNOWN LIMITATIONS — SELF-DECLARED</h3>
+    <ul>
+      <li>All results are from simulation mode with pre-seeded responses; live model output is non-deterministic and will differ.</li>
+      <li>MAX_RETRIES = 1 — a single retry; production would need exponential backoff.</li>
+      <li>No load or concurrency testing; SQLite is single-writer.</li>
+      <li>The 2,000-character truncation path exists but is not exercised by this test set.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>The decision on record</h2>
+  <div class="adr">
+    <span class="t mono">ADR-001 — VALIDATE AI OUTPUT BEFORE ROUTING · ACCEPTED 2026-06-19</span>
+    <p>Downstream systems don't validate what they receive; if the router silently mapped an unknown value to an arbitrary decision, the failure would be invisible and untraceable. So the architecture commits to one rule: no field from the AI response is trusted until it passes validation. The full decision record — context, alternatives, consequences — is in the repo.</p>
+  </div>
+  <div class="cta">
+    <a class="btn pri" href="https://github.com/kobescak-kristian/ai-reliability-engine">Clone it and run the eval yourself &rarr;</a>
+    <a class="btn sec" href="../index.html#engines">All five engines</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">KRISTIAN KOBESCAK · CASE STUDY · SOURCE OF EVERY NUMBER: evals/EVAL_RESULTS.md IN THE PUBLIC REPO</div>
+</footer>
+
+</body>
+</html>
