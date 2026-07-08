@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case study: AI Context Engine — Kristian Kobescak</title>
+<meta name="description" content="The eval gate was committed before the run. The run scored 58/75 against a ≥69 gate — published as FAIL, miss pattern analyzed, thresholds never touched.">
+<meta property="og:title" content="Case study: AI Context Engine — the run that failed its own gate">
+<meta property="og:description" content="A pre-committed eval gate, a keyed run at 58/75 against ≥69 — published as FAIL and analyzed in the open, not re-tuned until the number looked right.">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F6F2;--paper-2:#ECEFE9;--card:#FFFFFF;
+    --ink:#121A16;--ink-2:#3C4842;--muted:#5E6B64;--faint:#8B968F;--rule:#D8DED8;
+    --stamp:#0C6B52;--stamp-bright:#0E8563;--stamp-soft:#E1EFE8;
+    --warn:#B4881F;--warn-soft:#F7EFDA;
+    --fail:#8A3B2E;--fail-soft:#F6E7E2;
+    --dark:#10201A;--dark-2:#16291F;--dark-ink:#DFE9E2;--dark-muted:#8FA79A;--dark-rule:#24382E;
+    --maxw:880px;--radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--stamp);outline-offset:3px;border-radius:3px}
+  ::selection{background:var(--stamp-soft)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  .display{font-family:"Bricolage Grotesque",sans-serif;letter-spacing:-.015em}
+
+  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--paper) 82%,transparent);border-bottom:1px solid var(--rule)}
+  .nav .in{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .nav a{font-family:"IBM Plex Mono",monospace;font-size:12.5px;text-decoration:none;color:var(--muted)}
+  .nav a:hover{color:var(--stamp)}
+  .nav .brand{color:var(--ink);letter-spacing:.05em;display:flex;align-items:center;gap:10px}
+  .nav .brand .dot{width:9px;height:9px;border-radius:3px;background:var(--stamp)}
+
+  header.case{padding:clamp(56px,9vh,96px) 0 clamp(36px,5vh,56px)}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;color:var(--stamp)}
+  header.case h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(34px,5.6vw,60px);line-height:1.02;letter-spacing:-.02em;margin-top:16px;max-width:18ch}
+  .meta{display:flex;flex-wrap:wrap;gap:0;margin-top:30px;border:1px solid var(--rule);border-radius:8px;background:var(--card);overflow:hidden;font-family:"IBM Plex Mono",monospace;font-size:12px}
+  .meta span{padding:9px 14px;border-right:1px solid var(--rule);color:var(--muted)}
+  .meta span:last-child{border-right:none}
+  .meta .pass{color:var(--stamp);background:var(--stamp-soft);font-weight:500}
+  .meta .fail{color:var(--fail);background:var(--fail-soft);font-weight:500}
+
+  section{padding:clamp(30px,4.5vh,48px) 0}
+  h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:clamp(24px,3vw,32px);letter-spacing:-.015em;margin-bottom:16px}
+  p{max-width:66ch;color:var(--ink-2)}
+  p + p{margin-top:14px}
+  .dim{color:var(--muted)}
+
+  .figures{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;margin:26px 0 8px}
+  .figures div{background:var(--card);padding:22px 20px}
+  .figures .n{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(26px,3vw,38px);line-height:1}
+  .figures .n.bad{color:var(--fail)}
+  .figures .l{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:9px;text-transform:uppercase}
+  .prov{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--faint);margin-top:10px}
+  @media(max-width:760px){.figures{grid-template-columns:repeat(2,1fr)}}
+
+  table{width:100%;border-collapse:collapse;margin-top:22px;background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;font-size:14.5px}
+  table{display:block;overflow-x:auto}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:top;min-width:120px}
+  th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--paper-2)}
+  tr:last-child td{border-bottom:none}
+  td .mono{font-size:13px;background:var(--paper-2);border-radius:5px;padding:2px 7px;white-space:nowrap}
+  td.err{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:#8A3B2E}
+  td.ok{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--stamp)}
+
+  .callout{background:var(--dark);color:var(--dark-ink);border-radius:var(--radius);padding:clamp(26px,4vw,40px);margin-top:26px}
+  .callout .st{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:#E5B96B;border:1px solid #E5B96B;border-radius:5px;padding:4px 9px;display:inline-block;transform:rotate(-1.2deg)}
+  .callout blockquote{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:clamp(18px,2.1vw,23px);line-height:1.45;margin-top:16px;letter-spacing:-.01em}
+  .callout .src{margin-top:12px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--dark-muted)}
+
+  .limits{border:1px dashed var(--warn);background:var(--warn-soft);border-radius:var(--radius);padding:24px 26px;margin-top:22px}
+  .limits h3{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.12em;color:var(--warn);margin-bottom:12px}
+  .limits ul{margin-left:18px;color:var(--ink-2);font-size:15px}
+  .limits li{margin-top:6px}
+
+  .adr{border-left:3px solid var(--stamp);padding:6px 0 6px 22px;margin-top:22px}
+  .adr .t{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--stamp);letter-spacing:.08em}
+  .adr p{margin-top:8px}
+
+  .cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+  .btn{text-decoration:none;font-weight:600;font-size:15px;padding:13px 22px;border-radius:10px;transition:transform .18s}
+  .btn.pri{background:var(--ink);color:var(--paper)}
+  .btn.pri:hover{transform:translateY(-2px)}
+  .btn.sec{border:1px solid var(--rule);background:var(--card)}
+  .btn.sec:hover{border-color:var(--ink)}
+
+  footer{padding:44px 0 60px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12.5px;border-top:1px solid var(--rule);margin-top:40px}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap in">
+    <a class="brand" href="../index.html"><span class="dot"></span>KRISTIAN KOBESCAK</a>
+    <a href="../index.html">&larr; back to site</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<header class="case">
+  <span class="kicker mono">CASE STUDY · EVAL GATE · AI CONTEXT ENGINE</span>
+  <h1 class="display">The run that failed its own gate.</h1>
+  <div class="meta mono">
+    <span>keyed eval run · 2026-07-07 · 75 records</span>
+    <span>gate locked 2026-07-06 — before the run</span>
+    <span>repo verified @ 8ad6e07</span>
+    <span class="fail">RESULT: FAIL — PUBLISHED AS-IS</span>
+  </div>
+</header>
+
+<section>
+  <h2>The problem</h2>
+  <p>The AI Context Engine is the explanation layer of the pipeline: it retrieves past cases and rules, grounds each decision in that precedent, and cites its sources. It has two decision paths — a deterministic four-rule fallback that needs no API key, and an LLM layer that reads the retrieved context.</p>
+  <p>The only reason to route a decision through an LLM is to do better than the rule-based default. That is a measurable claim. And a measurement only means something if <strong>the bar is fixed before the result is known</strong> — and the result is recorded whichever way it lands.</p>
+</section>
+
+<section>
+  <h2>The gate, committed first</h2>
+  <p>The thresholds live in <span class="mono">eval_config.py</span>, locked 2026-07-06 — before the first official eval run. From the committed file: <em>"the numbers are fixed here first, then run_eval.py is pointed at them, so no threshold is chosen after seeing a result."</em></p>
+  <table>
+    <thead><tr><th>Gate</th><th>Threshold</th><th>Rationale (from the committed config)</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="mono">FALLBACK_GATE</span></td>
+        <td class="ok">&ge; 68 / 75</td>
+        <td>Audit-measured baseline for the deterministic path — a regression floor, not a target.</td>
+      </tr>
+      <tr>
+        <td><span class="mono">KEYED_GATE</span></td>
+        <td class="ok">&ge; 69 / 75</td>
+        <td>Must strictly beat the fallback — the only reason to route through an LLM is to do better than the rule-based default.</td>
+      </tr>
+      <tr>
+        <td><span class="mono">KEYED_TARGET</span></td>
+        <td class="ok">71 / 75</td>
+        <td>Reported, not gated — no evidence basis existed for treating it as pass/fail.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top:16px" class="dim">The ordering is public: in the repo history, the commit that adds these thresholds precedes both result commits. Anyone can check it with <span class="mono">git log</span>.</p>
+</section>
+
+<section>
+  <h2>The two runs</h2>
+  <p>Both runs executed on 2026-07-07 against the same committed 75-record eval set. The fallback run passed its gate. The keyed run — the first successful one; the originally hardcoded model had been retired and returned 404 on every request, so the model was swapped before a keyed run could complete — did not pass its gate. It scored below the deterministic baseline it was required to strictly beat.</p>
+  <div class="figures">
+    <div><div class="n display">68/75</div><div class="l">Fallback run — PASS (gate &ge;68)</div></div>
+    <div><div class="n display bad">58/75</div><div class="l">Keyed run — FAIL (gate &ge;69)</div></div>
+    <div><div class="n display">17</div><div class="l">Keyed misses, analyzed</div></div>
+    <div><div class="n display">0</div><div class="l">Thresholds changed after the result</div></div>
+  </div>
+  <p class="prov">Source: EVAL_RESULTS.md · all 75 keyed rows used the LLM layer as intended (context_was_used=1, used_fallback=0) — a genuine model-quality result, not fallback contamination</p>
+</section>
+
+<section>
+  <h2>The miss pattern</h2>
+  <p>Seventeen misses is not the interesting part. The interesting part is that they cluster — two failure modes, not random noise. This analysis is committed in the repo alongside the FAIL.</p>
+  <table>
+    <thead><tr><th>Cluster</th><th>Misses</th><th>What the model did</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Under-committing on clear-cut cases</td>
+        <td class="err">8</td>
+        <td>6&times; <span class="mono">qualify &rarr; manual_review</span>, 2&times; <span class="mono">qualify &rarr; escalate</span> — high-confidence, clearly-qualifying leads routed to a review queue instead of qualified outright. More conservative than the ground truth.</td>
+      </tr>
+      <tr>
+        <td>Avoiding <span class="mono">hold</span></td>
+        <td class="err">4</td>
+        <td>4&times; <span class="mono">hold &rarr; manual_review</span> — the same category the deterministic fallback <em>structurally cannot produce</em> (none of its four rules emits <span class="mono">hold</span>). The LLM has <span class="mono">hold</span> in its schema and system prompt, and converges on <span class="mono">manual_review</span> anyway. Grounding in retrieved context did not close this gap.</td>
+      </tr>
+      <tr>
+        <td>Scattered</td>
+        <td class="err">5</td>
+        <td>2&times; <span class="mono">manual_review &rarr; escalate</span>, 1&times; each <span class="mono">manual_review &rarr; hold</span> / <span class="mono">manual_review &rarr; disqualify</span> / <span class="mono">disqualify &rarr; manual_review</span>.</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section>
+  <h2>What held: grounding, proven separately</h2>
+  <p>The run failed on accuracy against generated labels. It did not fail on grounding: every keyed row cites the specific retrieved document IDs it reasoned from. A committed side-by-side run of the same lead with and without retrieved context shows the with-context leg citing <span class="mono">case_009</span>, <span class="mono">rule_006</span>, and <span class="mono">case_005</span> by ID at <span class="mono">confidence_adjusted 0.88</span> versus <span class="mono">0.75</span> without — the comparison is Example 8 in the repo's EXAMPLE_OUTPUTS.md.</p>
+  <div class="callout">
+    <span class="st mono">GROUNDING &ne; ACCURACY</span>
+    <blockquote>Grounding and accuracy are different claims; this repo can now support the first with evidence and cannot support the second.</blockquote>
+    <p class="src">&rarr; EVAL_RESULTS.md, interpretation section — committed together with the FAIL, not after it was fixed.</p>
+  </div>
+</section>
+
+<section>
+  <h2>What did <em>not</em> happen</h2>
+  <p>The score created an obvious temptation: tune the prompt, re-run, publish the better number. The results file rules it out by name — <em>"doing so after seeing this result would be gate-shopping."</em></p>
+  <p>So: single run, no retries, no prompt iteration. The rule is recorded with the result: if the system prompt or model is revised later, that is a new run with its own entry — not a silent re-run. The gate thresholds were never touched after the result; the one post-run edit to the config file changed a line of documentation wording, not a number, which anyone can confirm with <span class="mono">git log -p eval_config.py</span>. And the README was reconciled to report the failed run plainly instead of softening it.</p>
+</section>
+
+<section>
+  <h2>What this eval does <em>not</em> claim</h2>
+  <p>A credible eval states its own boundaries. From the committed results file, unedited in substance:</p>
+  <div class="limits">
+    <h3 class="mono">KNOWN LIMITATIONS — SELF-DECLARED</h3>
+    <ul>
+      <li>The eval labels are synthetic — generated, not real client data. 58/75 and 68/75 describe agreement with a generated label set, not real-world decision accuracy.</li>
+      <li>75 records is a point estimate, not a statistically powered result.</li>
+      <li>One keyed run, one model, no retries — no comparison against other models was attempted.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>The decision on record</h2>
+  <div class="adr">
+    <span class="t mono">ADR-0001 — SEMANTIC RETRIEVAL WITH A TF-IDF FALLBACK · ACCEPTED 2026-07-04</span>
+    <p>Retrieval attempts a semantic embedding model first; if the model isn't available, it falls back to a self-contained TF-IDF embedder built from the same corpus. Both paths produce same-shaped vectors into the same index, and every result records which mode built it — so the eval runs anywhere, with or without the model download. The full decision record is in the repo.</p>
+  </div>
+  <div class="cta">
+    <a class="btn pri" href="https://github.com/kobescak-kristian/ai-context-engine/blob/main/EVAL_RESULTS.md">Read the full analysis in the repo &rarr;</a>
+    <a class="btn sec" href="../index.html#engines">All five engines</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">KRISTIAN KOBESCAK · CASE STUDY · SOURCE OF EVERY NUMBER: EVAL_RESULTS.md · EXAMPLE_OUTPUTS.md · eval_config.py IN THE PUBLIC REPO</div>
+</footer>
+
+</body>
+</html>

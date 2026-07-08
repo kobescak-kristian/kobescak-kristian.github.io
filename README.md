@@ -6,9 +6,9 @@ Personal site of Kristian Kobescak — AI systems with inspectable controls.
 
 ## What this is
 
-A single static `index.html`. No framework, no build step, no dependencies,
-no tracking. The page presents a five-engine AI decision system, working
-method, and operating background.
+A static site: `index.html` plus one static page per case study. No
+framework, no build step, no dependencies, no tracking. The page presents
+a five-engine AI decision system, working method, and operating background.
 
 ## Content rule
 
@@ -19,7 +19,8 @@ deliberately not marked as repo-verified.
 
 ## Structure
 
-- `index.html` — the entire site
+- `index.html` — the main page
+- `case-studies/` — one static page per case study, same design system
 - `adr/` — decision records for this repository
 
 ## How it updates
