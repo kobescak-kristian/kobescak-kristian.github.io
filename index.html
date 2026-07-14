@@ -415,6 +415,14 @@
         <p>A bounded agent: tool whitelist, turn cap, per-run cost ceiling, SQLite audit trail. Shipped only after passing a pre-committed eval gate (precision &ge; 0.95, recall &ge; 0.90).</p>
         <a class="go mono" href="https://github.com/kobescak-kristian/ai-claim-verification-agent">github.com/kobescak-kristian/ai-claim-verification-agent <span>→</span></a>
       </article>
+
+      <article class="card rv" style="grid-column:1 / -1">
+        <div class="top"><span class="flag mono">ORCHESTRATION</span><span class="hash">gate run gate-9328e564</span></div>
+        <h3>AI Compliance Orchestrator</h3>
+        <p>Five bounded agents check gambling-site content against three jurisdictions' rule sets &mdash; each locked to its own tools, every step logged, a human approving every change. The orchestration layer passed all of its checks. The detection layer failed the quality bar set before the run (precision 0.844 vs &ge; 0.95) &mdash; published as-is, the bar untouched, miss analysis in the open. It reuses the claim-verification agent above, unmodified, as its adjudicator.</p>
+        <a class="go mono" href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/blob/main/evals/EVAL_RESULTS.md" style="color:var(--stamp)">Results table &mdash; including the FAIL <span>&rarr;</span></a>
+        <a class="go mono" href="https://github.com/kobescak-kristian/ai-compliance-orchestrator" style="padding-top:2px">github.com/kobescak-kristian/ai-compliance-orchestrator <span>&rarr;</span></a>
+      </article>
     </div>
 
     <div class="verified rv">
