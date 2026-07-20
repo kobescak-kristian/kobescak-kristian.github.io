@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case study: AI Impact Scoring Engine — Kristian Kobescak</title>
+<meta name="description" content="A financial-measurement engine whose aggregate did not reconcile with its own per-lead ledger. €3,130 double-counted penalty found in audit, fixed in public history, reconciled exactly.">
+<meta property="og:title" content="Case study: AI Impact Scoring Engine — the engine that didn't reconcile with its own ledger">
+<meta property="og:description" content="An audit summed the per-lead endpoint and got €119,240; the headline said €116,110. The delta was one penalty counted twice — found, fixed in public commits, reconciled exactly.">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F6F2;--paper-2:#ECEFE9;--card:#FFFFFF;
+    --ink:#121A16;--ink-2:#3C4842;--muted:#5E6B64;--faint:#8B968F;--rule:#D8DED8;
+    --stamp:#0C6B52;--stamp-bright:#0E8563;--stamp-soft:#E1EFE8;
+    --warn:#B4881F;--warn-soft:#F7EFDA;
+    --fail:#8A3B2E;--fail-soft:#F6E7E2;
+    --dark:#10201A;--dark-2:#16291F;--dark-ink:#DFE9E2;--dark-muted:#8FA79A;--dark-rule:#24382E;
+    --maxw:880px;--radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--stamp);outline-offset:3px;border-radius:3px}
+  ::selection{background:var(--stamp-soft)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  .display{font-family:"Bricolage Grotesque",sans-serif;letter-spacing:-.015em}
+
+  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--paper) 82%,transparent);border-bottom:1px solid var(--rule)}
+  .nav .in{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .nav a{font-family:"IBM Plex Mono",monospace;font-size:12.5px;text-decoration:none;color:var(--muted)}
+  .nav a:hover{color:var(--stamp)}
+  .nav .brand{color:var(--ink);letter-spacing:.05em;display:flex;align-items:center;gap:10px}
+  .nav .brand .dot{width:9px;height:9px;border-radius:3px;background:var(--stamp)}
+
+  header.case{padding:clamp(56px,9vh,96px) 0 clamp(36px,5vh,56px)}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;color:var(--stamp)}
+  header.case h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(34px,5.6vw,60px);line-height:1.02;letter-spacing:-.02em;margin-top:16px;max-width:18ch}
+  .meta{display:flex;flex-wrap:wrap;gap:0;margin-top:30px;border:1px solid var(--rule);border-radius:8px;background:var(--card);overflow:hidden;font-family:"IBM Plex Mono",monospace;font-size:12px}
+  .meta span{padding:9px 14px;border-right:1px solid var(--rule);color:var(--muted)}
+  .meta span:last-child{border-right:none}
+  .meta .pass{color:var(--stamp);background:var(--stamp-soft);font-weight:500}
+  .meta .fail{color:var(--fail);background:var(--fail-soft);font-weight:500}
+
+  section{padding:clamp(30px,4.5vh,48px) 0}
+  h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:clamp(24px,3vw,32px);letter-spacing:-.015em;margin-bottom:16px}
+  p{max-width:66ch;color:var(--ink-2)}
+  p + p{margin-top:14px}
+  .dim{color:var(--muted)}
+
+  .figures{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;margin:26px 0 8px}
+  .figures div{background:var(--card);padding:22px 20px}
+  .figures .n{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(26px,3vw,38px);line-height:1}
+  .figures .n.bad{color:var(--fail)}
+  .figures .l{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:9px;text-transform:uppercase}
+  .prov{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--faint);margin-top:10px}
+  @media(max-width:760px){.figures{grid-template-columns:repeat(2,1fr)}}
+
+  table{width:100%;border-collapse:collapse;margin-top:22px;background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;font-size:14.5px}
+  table{display:block;overflow-x:auto}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:top;min-width:120px}
+  th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--paper-2)}
+  tr:last-child td{border-bottom:none}
+  td .mono{font-size:13px;background:var(--paper-2);border-radius:5px;padding:2px 7px;white-space:nowrap}
+  td.err{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:#8A3B2E}
+  td.ok{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--stamp)}
+
+  .callout{background:var(--dark);color:var(--dark-ink);border-radius:var(--radius);padding:clamp(26px,4vw,40px);margin-top:26px}
+  .callout .st{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:#E5B96B;border:1px solid #E5B96B;border-radius:5px;padding:4px 9px;display:inline-block;transform:rotate(-1.2deg)}
+  .callout blockquote{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:clamp(18px,2.1vw,23px);line-height:1.45;margin-top:16px;letter-spacing:-.01em}
+  .callout .src{margin-top:12px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--dark-muted)}
+
+  .limits{border:1px dashed var(--warn);background:var(--warn-soft);border-radius:var(--radius);padding:24px 26px;margin-top:22px}
+  .limits h3{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.12em;color:var(--warn);margin-bottom:12px}
+  .limits ul{margin-left:18px;color:var(--ink-2);font-size:15px}
+  .limits li{margin-top:6px}
+
+  .adr{border-left:3px solid var(--stamp);padding:6px 0 6px 22px;margin-top:22px}
+  .adr .t{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--stamp);letter-spacing:.08em}
+  .adr p{margin-top:8px}
+
+  .cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+  .btn{text-decoration:none;font-weight:600;font-size:15px;padding:13px 22px;border-radius:10px;transition:transform .18s}
+  .btn.pri{background:var(--ink);color:var(--paper)}
+  .btn.pri:hover{transform:translateY(-2px)}
+  .btn.sec{border:1px solid var(--rule);background:var(--card)}
+  .btn.sec:hover{border-color:var(--ink)}
+
+  footer{padding:44px 0 60px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12.5px;border-top:1px solid var(--rule);margin-top:40px}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap in">
+    <a class="brand" href="../index.html"><span class="dot"></span>KRISTIAN KOBESCAK</a>
+    <a href="../index.html">&larr; back to site</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<header class="case">
+  <span class="kicker mono">CASE STUDY · RECONCILIATION · AI IMPACT SCORING ENGINE</span>
+  <h1 class="display">The financial engine that didn&rsquo;t reconcile with its own ledger.</h1>
+  <div class="meta mono">
+    <span>independent audit · 2026-07-05 · 75 synthetic leads</span>
+    <span>fixes verified public 2026-07-06</span>
+    <span>audited @ 98f9df6 · current @ b127fc4</span>
+    <span class="pass">RESULT: €3,130 DISCREPANCY — FOUND, FIXED, RECONCILED</span>
+  </div>
+</header>
+
+<section>
+  <h2>The problem</h2>
+  <p>The AI Impact Scoring Engine prices AI routing decisions: revenue won, cost of wasted sales effort, revenue lost to missed leads. Its entire pitch is deterministic, auditable financial numbers — the scoring is rule-based and runs before any AI call, so the same input always produces the same figure, and the LLM can only narrate numbers it is handed, never invent them (ADR-0001, committed in the repo).</p>
+  <p>A system that sells auditability has to survive being audited. So it was — from its public HEAD, by a separate model session instructed to be hostile: fresh clone, quickstart on a default Windows console, all five API endpoints exercised live, aggregate math reconciled against per-lead outputs.</p>
+</section>
+
+<section>
+  <h2>What the audit could not break</h2>
+  <p>Every numeric claim in the README reproduced exactly on a live run — 75 leads, all revenue figures, all three rates, both worked examples verbatim (audit claim-verification table: 25 claims, the README Outcome section verified line by line; full report is an internal record). The quickstart ran exit-0 with no encoding workarounds. The git history matched the version log. The layer separation held: the aggregation module imports no LLM client, and the AI layer&rsquo;s function signature accepts final metrics only — it cannot see raw lead data.</p>
+</section>
+
+<section>
+  <h2>What it found instead</h2>
+  <p>One level deeper: <strong>the flagship aggregate did not reconcile with the system&rsquo;s own per-lead ledger.</strong></p>
+  <div class="figures">
+    <div><span class="n">€119,240</span><div class="l">Sum of per-lead ledger</div></div>
+    <div><span class="n bad">€116,110</span><div class="l">Reported net impact</div></div>
+    <div><span class="n bad">€3,130</span><div class="l">Penalty counted twice</div></div>
+    <div><span class="n bad">20%</span><div class="l">Effective penalty vs 10% stated</div></div>
+  </div>
+  <p class="prov">Pre-fix figures from the 2026-07-05 audit run (internal record); the pre-fix README net of €116,110 is in the repo&rsquo;s public git history.</p>
+  <p>Summing <span class="mono">GET /impact/{lead_id}</span> over all 75 leads gave <strong>€119,240</strong>. <span class="mono">GET /impact</span> reported net impact <strong>€116,110</strong>. The €3,130 difference was the delayed-conversion penalty, counted twice — once inside per-lead revenue (entered net of penalty) and again as an itemized loss. Each delayed lead effectively carried a 20% penalty while the config and the README both said 10%. A reviewer who cross-sums the per-lead endpoint catches it in minutes; the AI layer narrated the inconsistent numbers with confidence.</p>
+  <p>Two more findings compounded it for the same skeptical reader: a valid input combination the README explicitly permits — <span class="mono">archived</span> + <span class="mono">converted_delayed</span> — fell out of the routing table and silently returned <span class="mono">unknown</span> with €0 impact, while the ADR asserted every valid pair was mapped (14 of 15 were); and the aggregate layer hardcoded penalty constants instead of reading the config multipliers the documentation pointed at, so tuning the config moved per-lead figures but not the headline.</p>
+</section>
+
+<section>
+  <h2>The fixes, in public history</h2>
+  <p>Two remediation commits, both in the open history and dated in the README version log. The accounting decision (gross-revenue entry, penalty counted once) was made by the owner; the fixes were implemented in-session and re-verified from a fresh public clone on 2026-07-06 before the record closed (internal record; the fix trail itself is public).</p>
+  <table>
+    <thead><tr><th>Commit</th><th>What it fixed</th></tr></thead>
+    <tbody>
+      <tr>
+        <td><span class="mono">34855be</span></td>
+        <td>Routing table completed to 15/15 valid pairs; <span class="mono">archived</span> + <span class="mono">converted_delayed</span> now classifies as <span class="mono">missed_opportunity</span>; unmapped combinations fail loud instead of silently returning <span class="mono">unknown</span>.</td>
+      </tr>
+      <tr>
+        <td><span class="mono">17c4fdb</span></td>
+        <td>Delayed revenue now enters the aggregate gross, with the penalty appearing exactly once; aggregate sums read the config multipliers instead of hardcoded constants, so config changes move per-lead and aggregate figures identically.</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>After the fix, net impact reconciles exactly with the sum of per-lead <span class="mono">financial_impact</span>: <strong>both €119,240</strong> on the demo dataset (README version log, verifiable by re-running <span class="mono">seed_and_run.py</span> and summing the per-lead endpoint). Revenue generated changed to €168,300; revenue lost (€49,060) and every rate (41.3% / 45.2% / 44.4%) unchanged — the fix moved only what the accounting error had distorted.</p>
+  <p>The before/after is reconstructable by anyone: the pre-fix README in git history says €116,110; the current README says €119,240; the delta is the double-counted penalty.</p>
+</section>
+
+<section>
+  <h2>The correction the repo doesn&rsquo;t hide</h2>
+  <div class="callout">
+    <span class="st mono">FROM THE PUBLIC VERSION LOG</span>
+    <blockquote>&ldquo;Audit fix (M1+M3, Option A): aggregate layer double-counted the delay penalty&rdquo;</blockquote>
+    <p class="src">README.md version log, 2026-07-06 — public, in the repo, with the mechanism, the accounting decision taken, and what changed versus what didn&rsquo;t.</p>
+  </div>
+  <p style="margin-top:18px">The history of being wrong is kept, not rewritten.</p>
+</section>
+
+<section>
+  <h2>What this does <em>not</em> claim</h2>
+  <p>All figures come from a 75-record synthetic dataset intentionally constructed to show both strong and weak decision performance — no production deployment is claimed. The README&rsquo;s own Known Limitations carry the rest:</p>
+  <div class="limits">
+    <h3 class="mono">KNOWN LIMITATIONS — SELF-DECLARED</h3>
+    <ul>
+      <li>Financial multipliers (15% / 10% / 100%) are assumed constants, not calibrated from real sales-cycle costs.</li>
+      <li>The missed-opportunity figure — the largest loss number in the demo — depends on outcome feedback that real systems rarely have complete, so it is the least reliable metric.</li>
+      <li>Recommendations are not anchored to actual upstream thresholds.</li>
+      <li>There is no coverage gate, so low-outcome-coverage runs look as confident as full ones.</li>
+    </ul>
+  </div>
+  <p style="margin-top:16px">Of seven minor audit findings, one was fixed in remediation; six were carried forward, documented rather than silently fixed (internal record).</p>
+</section>
+
+<section>
+  <h2>The decision on record</h2>
+  <div class="adr">
+    <span class="t mono">ADR-0001 — DETERMINISTIC SCORING BEFORE THE AI LAYER · ACCEPTED 2026-07-04</span>
+    <p>Financial numbers are computed by static lookup and fixed multipliers before any model runs; the only LLM module receives the finished metrics object and nothing else. Consequence stated in the ADR itself: hallucination risk is bounded to prose — the model cannot fabricate or alter a euro figure. The audit tested that boundary and it held; what broke was arithmetic in the deterministic layer, which is exactly the layer a reviewer <em>can</em> catch — and did.</p>
+  </div>
+  <div class="cta">
+    <a class="btn pri" href="https://github.com/kobescak-kristian/ai-impact-scoring-engine">Clone it and re-run the reconciliation &rarr;</a>
+    <a class="btn sec" href="../index.html#engines">All five engines</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">KRISTIAN KOBESCAK · CASE STUDY · HEADLINE NUMBERS: README VERSION LOG + PUBLIC COMMIT HISTORY IN THE REPO · SUPPORTING DETAIL: INTERNAL AUDIT RECORD</div>
+</footer>
+
+</body>
+</html>
