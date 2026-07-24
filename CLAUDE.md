@@ -23,6 +23,8 @@ are hash-pinned to specific commits.
   user.email; /home/user/ or noreply@anthropic.com = cloud
   sandbox = read-only, no pen). Pen check on main at open AND
   pre-commit.
+- Never write absolute local paths into tracked files —
+  machine-specific values go to the gitignored local config.
 - Evidence: case-study pages pin engine commits by hash. NO
   history rewrites, ever — here or in any pinned repo.
 - Close ritual: commit -> push origin main -> verify
