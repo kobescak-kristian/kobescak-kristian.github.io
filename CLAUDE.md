@@ -29,6 +29,5 @@ are hash-pinned to specific commits.
   history rewrites, ever — here or in any pinned repo.
 - Close ritual: commit -> push origin main -> verify
   origin/main..HEAD empty -> report verbatim.
-- Work comes from the governance repo's queue (kristian-os,
-  FABLE_QUEUE) and the webpage queue in its github-ops STATE;
-  do not invent tasks.
+- Work comes from the governance repo's queue (kristian-os) and
+  its webpage queue; do not invent tasks.
