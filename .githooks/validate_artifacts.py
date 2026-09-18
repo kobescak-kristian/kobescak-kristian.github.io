@@ -31,6 +31,12 @@ readme = ROOT / "README.md"
 if not readme.exists():
     errors.append("README.md missing")
 
+# Build-repo STATE rule (GOVERNANCE.md): required in every repo, no
+# PROJECT/SYSTEM/EXPERIMENT exemption.
+state = ROOT / "STATE.md"
+if not state.exists():
+    errors.append("STATE.md missing")
+
 # AGENTS.md (ARTIFACT_STANDARD v2.7, Tier 0): root file + required H2
 # headings. Match is case-insensitive; "&" is accepted for "and". The
 # optional "## Repository landmarks" section is not checked.
