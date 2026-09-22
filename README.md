@@ -1,19 +1,24 @@
 # kobescak-kristian.github.io
 
-Personal site of Kristian Kobescak — AI systems with inspectable controls.
+Personal site of Kristian Kobescak — operations practitioner turning
+business workflows into controlled AI-assisted systems.
 
 **Live:** https://kobescak-kristian.github.io
 
 ## What this is
 
 A static site: `index.html` plus one static page per case study. No
-framework, no build step, no dependencies, no tracking. The page presents
-a five-engine AI decision system, working method, and operating background.
+framework, no build step, no dependencies, no tracking. The homepage runs
+systems → reference architecture → method → experience, and presents the
+public repositories as independent systems that share a way of working
+rather than a shared runtime.
 
 ## Content rule
 
-Every repository claim on the page was traced to a committed, publicly
-verifiable artifact before publishing (audit date shown on the page).
+Every repository claim on the page was re-derived from a committed,
+publicly verifiable artifact in the repository it describes before
+publishing. Where a page shows a commit hash, that hash is a dated
+evidence anchor, not a claim about that repository's current HEAD.
 Claims about work history are CV facts, verifiable on LinkedIn, and are
 deliberately not marked as repo-verified.
 
@@ -25,14 +30,22 @@ deliberately not marked as repo-verified.
 
 ## How it updates
 
-Manual commits only. One commented-out section (a sixth repository card)
-ships dark and is enabled in a future commit once that repository is public
-and its link verified.
+Manual commits only. A repository card ships only once that repository is
+public and its link verified.
 
 ## Related repositories
 
-- [ai-reliability-engine](https://github.com/kobescak-kristian/ai-reliability-engine) (flagship)
+Featured, in the order the homepage presents them:
+
+- [ai-portfolio-sentinel](https://github.com/kobescak-kristian/ai-portfolio-sentinel) — portfolio flagship; status: in development toward production-ready
+- [ai-compliance-orchestrator](https://github.com/kobescak-kristian/ai-compliance-orchestrator) — advanced system
+- [ai-claim-verification-agent](https://github.com/kobescak-kristian/ai-claim-verification-agent) — advanced system
+- [ai-context-engine](https://github.com/kobescak-kristian/ai-context-engine) — business-workflow capability
+- [ai-execution-engine](https://github.com/kobescak-kristian/ai-execution-engine) — business-workflow capability
+- [ai-impact-scoring-engine](https://github.com/kobescak-kristian/ai-impact-scoring-engine) — business-workflow capability
+
+Also public, retained on the page as part of the labelled reference
+architecture rather than as an integrated runtime:
+
+- [ai-reliability-engine](https://github.com/kobescak-kristian/ai-reliability-engine)
 - [ai-decision-engine](https://github.com/kobescak-kristian/ai-decision-engine)
-- [ai-impact-scoring-engine](https://github.com/kobescak-kristian/ai-impact-scoring-engine)
-- [ai-execution-engine](https://github.com/kobescak-kristian/ai-execution-engine)
-- [ai-context-engine](https://github.com/kobescak-kristian/ai-context-engine)

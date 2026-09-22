@@ -1,3 +1,5 @@
 CLAUDE.md | - Governance home: kristian-os (PRINCIPLES -> GOVERNANCE -> | owner ruling 2026-08-04 (entry-exact migration, site-redact-a)
 CLAUDE.md |   FAILURE_REGISTER). Read before any irreversible action. | owner ruling 2026-08-04 (entry-exact migration, site-redact-a)
 CLAUDE.md | - Work comes from the governance repo's queue (kristian-os) and | owner ruling 2026-08-04 (entry-exact migration, site-redact-a)
+.githooks/validate_artifacts.py | # Build-repo STATE rule (GOVERNANCE.md): required in every repo, no | owner ruling 2026-09-22 (website-specific public-surface cleanup)
+STATE.md | **RECONSTRUCTED** (GOVERNANCE.md Build-repo STATE rule, clause 7): derived from git history at scaffold time (2026-09-19), not written contemporaneously. Reconstructed entries are retrospective evidence, not contemporaneous record — the commit that adds this file begins the contemporaneous record going forward. | owner ruling 2026-09-22 (website-specific public-surface cleanup)
