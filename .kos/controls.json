@@ -8,7 +8,8 @@
     ],
     "C2": [
       ".githooks/",
-      ".kos/"
+      ".kos/",
+      ".github/workflows/"
     ],
     "C3": [
       "adr/",
@@ -23,6 +24,7 @@
     "check_controls.py",
     "check_work.py",
     "pre-commit",
-    "pre-push"
+    "pre-push",
+    "kos-controls.yml"
   ]
 }
