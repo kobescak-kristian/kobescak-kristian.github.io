@@ -109,6 +109,7 @@
     <span>run_20260704_031434_8cda36</span>
     <span>2026-07-04 · fresh clone · exit 0</span>
     <span class="pass">REPRODUCIBLE — NO API KEY NEEDED</span>
+    <span class="pass">RESULT: 7 OF 7 FAILURES CAUGHT, ALL ROUTED TO HUMAN REVIEW</span>
   </div>
 </header>
 
@@ -132,7 +133,7 @@
     <div><div class="n display">7</div><div class="l">Failures caught &amp; safely handled</div></div>
     <div><div class="n display">100%</div><div class="l">Decisions traceable by run ID</div></div>
   </div>
-  <p class="prov">Source: evals/EVAL_RESULTS.md · decision distribution: 22 send_to_sales · 19 manual_review · 10 archive · 19 alerts queued</p>
+  <p class="prov">Source: evals/EVAL_RESULTS.md · decision distribution: 22 send_to_sales · 19 manual_review · 10 archive · 19 alerts queued · All 51 records are synthetic lead text with no real personal information.</p>
 </section>
 
 <section>
@@ -174,7 +175,8 @@
 </section>
 
 <section>
-  <h2>What this eval does <em>not</em> cover</h2>
+  <h2>What this eval proves, and what it does <em>not</em></h2>
+  <p>On a fixed set of 51 synthetic records, all 7 failures (3 forced invalid AI outputs and 4 records with no usable AI response) were caught and sent to human review. The run is reproducible from a fresh clone without an API key, because simulation mode uses pre-seeded responses, and CI repeats it on every push. It does not show how a live model behaves.</p>
   <p>A credible eval states its own boundaries. From the committed results file, unedited in substance:</p>
   <div class="limits">
     <h3 class="mono">KNOWN LIMITATIONS — SELF-DECLARED</h3>
@@ -193,6 +195,7 @@
     <span class="t mono">ADR-001 — VALIDATE AI OUTPUT BEFORE ROUTING · ACCEPTED 2026-06-19</span>
     <p>Downstream systems don't validate what they receive; if the router silently mapped an unknown value to an arbitrary decision, the failure would be invisible and untraceable. So the architecture commits to one rule: no field from the AI response is trusted until it passes validation. The full decision record — context, alternatives, consequences — is in the repo.</p>
   </div>
+  <p style="margin-top:18px">Built with Claude coding agents, which are named as co-authors in the commit history. Kristian made the design decision (ADR-001); CI re-runs the eval on every push and checks the counts.</p>
   <div class="cta">
     <a class="btn pri" href="https://github.com/kobescak-kristian/ai-reliability-engine">Clone it and run the eval yourself &rarr;</a>
     <a class="btn sec" href="../index.html#engines">All the systems</a>
