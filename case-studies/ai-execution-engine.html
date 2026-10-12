@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case study: AI Execution Engine · Kristian Kobescak</title>
+<meta name="description" content="A deterministic lead workflow with a recommend-only AI agent. The fix commits record that its README described automated checks the demo could not fire and a duplicate flag the code did not store; the README was re-derived from a run, and a CI check now re-runs the demo on six configurations.">
+<meta property="og:title" content="Case study: AI Execution Engine, three documented checks that never fired in the demo">
+<meta property="og:description" content="README claims the code did not deliver, fixed and re-derived from a live run; one re-derived number still drifted with the date, so the README now keeps only run figures that do not change with the run date.">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F6F2;--paper-2:#ECEFE9;--card:#FFFFFF;
+    --ink:#121A16;--ink-2:#3C4842;--muted:#5E6B64;--faint:#8B968F;--rule:#D8DED8;
+    --stamp:#0C6B52;--stamp-bright:#0E8563;--stamp-soft:#E1EFE8;
+    --warn:#B4881F;--warn-soft:#F7EFDA;
+    --fail:#8A3B2E;--fail-soft:#F6E7E2;
+    --dark:#10201A;--dark-2:#16291F;--dark-ink:#DFE9E2;--dark-muted:#8FA79A;--dark-rule:#24382E;
+    --maxw:880px;--radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--stamp);outline-offset:3px;border-radius:3px}
+  ::selection{background:var(--stamp-soft)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  .display{font-family:"Bricolage Grotesque",sans-serif;letter-spacing:-.015em}
+
+  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--paper) 82%,transparent);border-bottom:1px solid var(--rule)}
+  .nav .in{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .nav a{font-family:"IBM Plex Mono",monospace;font-size:12.5px;text-decoration:none;color:var(--muted)}
+  .nav a:hover{color:var(--stamp)}
+  .nav .brand{color:var(--ink);letter-spacing:.05em;display:flex;align-items:center;gap:10px}
+  .nav .brand .dot{width:9px;height:9px;border-radius:3px;background:var(--stamp)}
+
+  header.case{padding:clamp(56px,9vh,96px) 0 clamp(36px,5vh,56px)}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;color:var(--stamp)}
+  header.case h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(34px,5.6vw,60px);line-height:1.02;letter-spacing:-.02em;margin-top:16px;max-width:18ch}
+  .meta{display:flex;flex-wrap:wrap;gap:0;margin-top:30px;border:1px solid var(--rule);border-radius:8px;background:var(--card);overflow:hidden;font-family:"IBM Plex Mono",monospace;font-size:12px}
+  .meta span{padding:9px 14px;border-right:1px solid var(--rule);color:var(--muted)}
+  .meta span:last-child{border-right:none}
+  .meta .pass{color:var(--stamp);background:var(--stamp-soft);font-weight:500}
+  .meta .fail{color:var(--fail);background:var(--fail-soft);font-weight:500}
+
+  section{padding:clamp(30px,4.5vh,48px) 0}
+  h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:clamp(24px,3vw,32px);letter-spacing:-.015em;margin-bottom:16px}
+  p{max-width:66ch;color:var(--ink-2)}
+  p + p{margin-top:14px}
+  .dim{color:var(--muted)}
+
+  .figures{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;margin:26px 0 8px}
+  .figures div{background:var(--card);padding:22px 20px}
+  .figures .n{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(26px,3vw,38px);line-height:1}
+  .figures .n.bad{color:var(--fail)}
+  .figures .l{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:9px;text-transform:uppercase}
+  .prov{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--faint);margin-top:10px}
+  @media(max-width:760px){.figures{grid-template-columns:repeat(2,1fr)}}
+
+  table{width:100%;border-collapse:collapse;margin-top:22px;background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;font-size:14.5px}
+  table{display:block;overflow-x:auto}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:top;min-width:120px}
+  th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--paper-2)}
+  tr:last-child td{border-bottom:none}
+  td .mono{font-size:13px;background:var(--paper-2);border-radius:5px;padding:2px 7px;white-space:nowrap}
+  td.err{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:#8A3B2E}
+  td.ok{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--stamp)}
+
+  .callout{background:var(--dark);color:var(--dark-ink);border-radius:var(--radius);padding:clamp(26px,4vw,40px);margin-top:26px}
+  .callout .st{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:#E5B96B;border:1px solid #E5B96B;border-radius:5px;padding:4px 9px;display:inline-block;transform:rotate(-1.2deg)}
+  .callout blockquote{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:clamp(18px,2.1vw,23px);line-height:1.45;margin-top:16px;letter-spacing:-.01em}
+  .callout .src{margin-top:12px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--dark-muted)}
+
+  .limits{border:1px dashed var(--warn);background:var(--warn-soft);border-radius:var(--radius);padding:24px 26px;margin-top:22px}
+  .limits h3{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.12em;color:var(--warn);margin-bottom:12px}
+  .limits ul{margin-left:18px;color:var(--ink-2);font-size:15px}
+  .limits li{margin-top:6px}
+
+  .adr{border-left:3px solid var(--stamp);padding:6px 0 6px 22px;margin-top:22px}
+  .adr .t{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--stamp);letter-spacing:.08em}
+  .adr p{margin-top:8px}
+
+  .cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+  .btn{text-decoration:none;font-weight:600;font-size:15px;padding:13px 22px;border-radius:10px;transition:transform .18s}
+  .btn.pri{background:var(--ink);color:var(--paper)}
+  .btn.pri:hover{transform:translateY(-2px)}
+  .btn.sec{border:1px solid var(--rule);background:var(--card)}
+  .btn.sec:hover{border-color:var(--ink)}
+
+  footer{padding:44px 0 60px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12.5px;border-top:1px solid var(--rule);margin-top:40px}
+</style>
+</head>
+
+<body>
+
+<nav class="nav">
+  <div class="wrap in">
+    <a class="brand" href="../index.html"><span class="dot"></span>KRISTIAN KOBESCAK</a>
+    <a href="../index.html">&larr; back to site</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+
+<header class="case">
+  <span class="kicker mono">CASE STUDY · AUDIT REMEDIATION · AI EXECUTION ENGINE</span>
+  <h1 class="display">Three automated checks were documented. In the demo, none of them could fire.</h1>
+  <div class="meta mono">
+    <span>remediation release · 2026-07-07</span>
+    <span>CI run 37516118077 · 2026-10-06</span>
+    <span>repo verified @ 637763b</span>
+    <span class="pass">RESULT: 6 OF 6 CI JOBS GREEN · NO EVAL GATE</span>
+  </div>
+  <p style="margin-top:22px">A lead-routing workflow for operations and sales teams, with an AI agent that may only recommend: its fix commits record that the README described automated checks the demo could not fire and a duplicate flag the code did not store, and after the fixes the demo, on synthetic data, passes a CI check on six configurations.</p>
+</header>
+
+<section>
+  <h2>The problem</h2>
+  <p>Lead workflows are easy to start and hard to keep honest. Leads arrive from different channels in different shapes, get scored and routed, and move through stages. Many automations handle intake inconsistently, route on logic that cannot be audited, and cannot show where leads stall or why. When an AI is added, it often acts on the workflow directly, so a bad suggestion becomes a bad state change with no way back.</p>
+  <p>The system is for operations and sales teams that need lead handling to be deterministic and auditable, with AI used for insight rather than uncontrolled action.</p>
+</section>
+
+<section>
+  <h2>What was built, and the test it is held to</h2>
+  <p>Leads arrive from three source types (web form, email, ad platform). Each is normalised into one validated schema, scored, and routed by fixed rules to one of five named queues and a stage in a fixed lifecycle: new, qualified, assigned, contacted, proposal, then won or lost. Every stage change is stored in SQLite with its trigger and time, so the path of any lead can be rebuilt. A metrics step computes stage counts, stuck and aging leads, and queue workload. Nine API endpoints expose the state.</p>
+  <p>The AI part is one agent (OpenAI <span class="mono">gpt-4o-mini</span>) that reads the computed metrics and returns structured recommendations, each with an expected effect and a trade-off. It changes no lead, stage or queue. With no API key, or when the call fails, a deterministic function over the same metrics answers instead.</p>
+  <p>This repository has no eval gate committed before a run. The check it is held to is a regression test, added on 2026-07-27 after the fixes described below. It runs the demo with an empty API key and asserts six output lines that do not depend on the date. It runs on Ubuntu, macOS and Windows with Python 3.12 and 3.14, on every push and pull request to main. The expected lines were frozen from fresh-clone runs: two identical runs and one with a varied hash seed, per Python version.</p>
+</section>
+
+<section>
+  <h2>The run</h2>
+  <p>The CI run at the pinned commit, <a href="https://github.com/kobescak-kristian/ai-execution-engine/actions/runs/37516118077" class="mono">37516118077</a>, ran on 2026-10-06 at commit <span class="mono">637763b</span>, and all 6 jobs passed. The data is synthetic: 74 generated leads plus 2 deliberate repeats, one with the same data and one with conflicting data, not real CRM records. Because the API key is empty, the agent's answer comes from the deterministic fallback, not from the model. The counts below are the output lines the test asserts in every job.</p>
+  <div class="figures">
+    <div><div class="n display">74</div><div class="l">Leads ingested, 0 failed</div></div>
+    <div><div class="n display">1 + 1</div><div class="l">Repeats: 1 flagged as duplicate, 1 rejected as conflict</div></div>
+    <div><div class="n display">1 + 1</div><div class="l">Follow-up escalation, re-engagement queued</div></div>
+    <div><div class="n display">6 / 6</div><div class="l">CI jobs green: 3 operating systems, 2 Python versions</div></div>
+  </div>
+  <p class="prov">Source: tests/test_ci.py (asserted output lines) · CI run 37516118077 at 637763b · synthetic data: generated leads, not real CRM records</p>
+</section>
+
+<section>
+  <h2>What the README said, and what the code did</h2>
+  <p>The README carried the first three claims below from its case-study version of 2026-06-17; the setup step was added on 2026-06-20, in a first round of audit fixes that did not fix the other three. The fix commits of 2026-07-06 and 2026-07-07, released as the 2026-07-07 remediation release, record what the code actually did. The audit report itself is not in the repository; its findings are known from these commits.</p>
+  <table>
+    <thead><tr><th>What the README said</th><th>What the code did</th><th>The fix</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Automated checks surface overdue, stuck and stale leads, "without manual triggering".</td>
+        <td class="err">In the demo run, all three checks could never fire. Ingest stamped every lead as updated "now", so none could look stale, and no seeded lead could reach the assigned or contacted stage before the checks ran.</td>
+        <td>Ingest keeps each lead's own arrival time, and the demo ages two leads by fixed day offsets. "Without manual triggering" became "on demand". <a class="mono" href="https://github.com/kobescak-kristian/ai-execution-engine/commit/0a12a5f">0a12a5f</a></td>
+      </tr>
+      <tr>
+        <td>Duplicates are "flagged, not dropped".</td>
+        <td class="err">A repeated lead was skipped with a log line. No flag was stored, and a repeat with different data was skipped the same way.</td>
+        <td>Same data returns 200 and increments a stored duplicate count; different data returns 409 and leaves the stored lead untouched. <a class="mono" href="https://github.com/kobescak-kristian/ai-execution-engine/commit/d592705">d592705</a></td>
+      </tr>
+      <tr>
+        <td>Leads are routed to named queues, including a manual review queue.</td>
+        <td class="err">No lead could score low enough to reach manual review, and a lead moved there by a stage change kept its old queue.</td>
+        <td>A missing company signal now lowers the score, and a move to manual review sets that queue. <a class="mono" href="https://github.com/kobescak-kristian/ai-execution-engine/commit/5e72d58">5e72d58</a></td>
+      </tr>
+      <tr>
+        <td>Setup: copy the example settings file; the API key is optional, and the agent falls back if it is unset.</td>
+        <td class="err">The example file held a placeholder API key, which counted as set, so the demo fired a live API call with it before falling back.</td>
+        <td>The example key is empty, and a placeholder key counts as no key, with no network call. <a class="mono" href="https://github.com/kobescak-kristian/ai-execution-engine/commit/a5a9725">a5a9725</a></td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top:18px">The same release fixed a crash on the default Windows console when lead data held non-ASCII characters. A documentation pass on the fixed code followed:</p>
+  <div class="callout">
+    <span class="st mono">RE-DERIVED, NOT CARRIED FORWARD</span>
+    <blockquote>Mapped every Outcome bullet, dataset count, and check figure to a line of that output rather than carrying forward any pre-remediation number.</blockquote>
+    <p class="src">&rarr; commit 4c68a43, 2026-07-07, after a fresh run of the fixed code.</p>
+  </div>
+  <p style="margin-top:22px">That pass still got one number wrong. It put 12 stuck leads in the README, and its commit message called the check counts stable across runs. On 2026-07-27, the same day the CI check was added, the README's Outcome section was cut back to figures that do not depend on the date: the stuck count and the recommendation count change with the run date, because the demo data is frozen and the age checks compare it against the current clock. The README now says why the stuck count is left out, and the CI check does not assert it.</p>
+</section>
+
+<section>
+  <h2>What this proves, and what it does not</h2>
+  <p>It proves that, on synthetic data, the keyless demo produces the same counts on six combinations of operating system and Python version, re-checked on every push and pull request: leads ingested and failed, repeats flagged and rejected, the two backdated checks, and the deterministic source of the agent's answer.</p>
+  <p>It does not prove the quality of the agent's recommendations: the repository holds no evaluation of them, and the CI run never calls the model. It does not test the agent's boundary: that the agent changes no state is a design decision in the code and its decision record, and no test asserts it. The CI check does not assert manual-review routing or the placeholder-key path, and it does not cover the stuck-lead count, real CRM data, concurrent load or access control.</p>
+  <div class="limits">
+    <h3 class="mono">KNOWN LIMITATIONS, SELF-DECLARED</h3>
+    <ul>
+      <li>Synthetic data: the 74 leads and the 2 repeat fixtures are generated, not real CRM data.</li>
+      <li>No API authentication: the endpoints are open, and production would need authentication middleware.</li>
+      <li>SQLite does not support concurrent writes at high throughput; the named production upgrade is PostgreSQL.</li>
+      <li>The agent is stateless: it has no memory of earlier recommendations and no trend tracking across runs, and a person has to implement each recommendation.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>The decision on record</h2>
+  <div class="adr">
+    <span class="t mono">ADR 0001: BOUNDED AGENT, RECOMMENDATION ONLY · ACCEPTED 2026-07-04 · REVISED 2026-07-07</span>
+    <p>The agent reads only computed metrics and returns structured recommendations (issue, recommendation, expected effect, trade-off, priority). It calls no function that changes lead state. If the API key is unset, empty or the known placeholder, or if the call fails for any reason, the code falls back to a pure function over the metrics with no external call. Scoring and routing run independently of the agent. The trade-off is recorded: recommendations are not applied automatically, so their value depends on a person acting on them, accepted as the cost of auditability.</p>
+  </div>
+  <p style="margin-top:18px">The record's status reads "Accepted (implemented)", and the case-study README of 2026-06-17 already described an agent that recommends without changing state. The documentation pass of 2026-07-07 revised the record to add the placeholder-key fallback. One step the repository records as open is API authentication: the endpoints are open, and the README says production requires authentication middleware.</p>
+  <p>Built with Claude coding agents, which are named as co-authors in the commit history: 19 of 34 commits, including every fix commit of the remediation release. All commits are published under Kristian Kobescak's name, and the repository records no reviewer other than the CI check on six configurations.</p>
+  <div class="cta">
+    <a class="btn pri" href="https://github.com/kobescak-kristian/ai-execution-engine/blob/637763b/tests/test_ci.py">Read the CI check in the repo &rarr;</a>
+    <a class="btn sec" href="../index.html#engines">All the systems</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">KRISTIAN KOBESCAK · CASE STUDY · SOURCE OF EVERY NUMBER: tests/test_ci.py · CI RUN 37516118077 · COMMIT HISTORY IN THE PUBLIC REPO</div>
+</footer>
+
+</body>
+</html>
