@@ -6,7 +6,7 @@
 <title>Case study: AI Execution Engine · Kristian Kobescak</title>
 <meta name="description" content="A deterministic lead workflow with a recommend-only AI agent. The fix commits record that its README described automated checks the demo could not fire and a duplicate flag the code did not store; the README was re-derived from a run, and a CI check now re-runs the demo on six configurations.">
 <meta property="og:title" content="Case study: AI Execution Engine, three documented checks that never fired in the demo">
-<meta property="og:description" content="README claims the code did not deliver, fixed and re-derived from a live run; one re-derived number still drifted with the date, so the README now keeps only run figures that do not change with the run date.">
+<meta property="og:description" content="README claims the code did not deliver, fixed and re-derived from a live run; two re-derived figures still drifted with the date, so the README now keeps only run figures that do not change with the run date.">
 <meta property="og:type" content="article">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -134,7 +134,7 @@
 
 <section>
   <h2>The run</h2>
-  <p>The CI run at the pinned commit, <a href="https://github.com/kobescak-kristian/ai-execution-engine/actions/runs/37516118077" class="mono">37516118077</a>, ran on 2026-10-06 at commit <span class="mono">637763b</span>, and all 6 jobs passed. The data is synthetic: 74 generated leads plus 2 deliberate repeats, one with the same data and one with conflicting data, not real CRM records. Because the API key is empty, the agent's answer comes from the deterministic fallback, not from the model. The counts below are the output lines the test asserts in every job.</p>
+  <p>The CI run at the pinned commit, <a href="https://github.com/kobescak-kristian/ai-execution-engine/actions/runs/37516118077" class="mono">37516118077</a>, ran on 2026-10-06 at commit <span class="mono">637763b</span>, and all 6 jobs passed. The data is synthetic: 74 generated leads plus 2 deliberate repeats, one with the same data and one with conflicting data, not real CRM records. Because the API key is empty, the agent's answer comes from the deterministic fallback, not from the model. The first three tiles are output lines the test asserts in every job; the fourth is the CI run result.</p>
   <div class="figures">
     <div><div class="n display">74</div><div class="l">Leads ingested, 0 failed</div></div>
     <div><div class="n display">1 + 1</div><div class="l">Repeats: 1 flagged as duplicate, 1 rejected as conflict</div></div>
@@ -146,7 +146,7 @@
 
 <section>
   <h2>What the README said, and what the code did</h2>
-  <p>The README carried the first three claims below from its case-study version of 2026-06-17; the setup step was added on 2026-06-20, in a first round of audit fixes that did not fix the other three. The fix commits of 2026-07-06 and 2026-07-07, released as the 2026-07-07 remediation release, record what the code actually did. The audit report itself is not in the repository; its findings are known from these commits.</p>
+  <p>The README carried the first three claims below from its case-study version of 2026-06-17. The copy step in the fourth row was there from the first README, and its wording about the optional key dates from 2026-06-20, from a first round of audit fixes that did not fix any of the four. The fix commits of 2026-07-06 and 2026-07-07, released as the 2026-07-07 remediation release, record what the code actually did. The audit report itself is not in the repository; its findings are known from these commits.</p>
   <table>
     <thead><tr><th>What the README said</th><th>What the code did</th><th>The fix</th></tr></thead>
     <tbody>
@@ -178,7 +178,7 @@
     <blockquote>Mapped every Outcome bullet, dataset count, and check figure to a line of that output rather than carrying forward any pre-remediation number.</blockquote>
     <p class="src">&rarr; commit 4c68a43, 2026-07-07, after a fresh run of the fixed code.</p>
   </div>
-  <p style="margin-top:22px">That pass still got one number wrong. It put 12 stuck leads in the README, and its commit message called the check counts stable across runs. On 2026-07-27, the same day the CI check was added, the README's Outcome section was cut back to figures that do not depend on the date: the stuck count and the recommendation count change with the run date, because the demo data is frozen and the age checks compare it against the current clock. The README now says why the stuck count is left out, and the CI check does not assert it.</p>
+  <p style="margin-top:22px">That pass still pinned two figures that change with the run date: 12 stuck leads and 4 recommendations per run, and its commit message called the check counts stable across runs. On 2026-07-27, the same day the CI check was added, the README's Outcome section was cut back to figures that do not depend on the date: both counts change with the run date, because the demo data is frozen and the age checks compare it against the current clock. The README now says why the stuck count is left out, and the CI check does not assert it.</p>
 </section>
 
 <section>
@@ -203,7 +203,7 @@
     <p>The agent reads only computed metrics and returns structured recommendations (issue, recommendation, expected effect, trade-off, priority). It calls no function that changes lead state. If the API key is unset, empty or the known placeholder, or if the call fails for any reason, the code falls back to a pure function over the metrics with no external call. Scoring and routing run independently of the agent. The trade-off is recorded: recommendations are not applied automatically, so their value depends on a person acting on them, accepted as the cost of auditability.</p>
   </div>
   <p style="margin-top:18px">The record's status reads "Accepted (implemented)", and the case-study README of 2026-06-17 already described an agent that recommends without changing state. The documentation pass of 2026-07-07 revised the record to add the placeholder-key fallback. One step the repository records as open is API authentication: the endpoints are open, and the README says production requires authentication middleware.</p>
-  <p>Built with Claude coding agents, which are named as co-authors in the commit history: 19 of 34 commits, including every fix commit of the remediation release. All commits are published under Kristian Kobescak's name, and the repository records no reviewer other than the CI check on six configurations.</p>
+  <p>Built with Claude coding agents, which are named as co-authors in the commit history: 19 of 34 commits, including every fix commit of the remediation release. Every commit lists Kristian Kobescak as author, and the repository records no reviewer other than the CI check on six configurations.</p>
   <div class="cta">
     <a class="btn pri" href="https://github.com/kobescak-kristian/ai-execution-engine/blob/637763b/tests/test_ci.py">Read the CI check in the repo &rarr;</a>
     <a class="btn sec" href="../index.html#engines">All the systems</a>
