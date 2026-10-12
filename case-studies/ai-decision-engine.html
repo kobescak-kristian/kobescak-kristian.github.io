@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case study: AI Decision Engine · Kristian Kobescak</title>
+<meta name="description" content="A lead-routing pipeline that scores its own decisions against later outcomes. Its fix commits record that a stored decision could be overwritten, one lead's outcome could be counted twice, and a failed validation was discarded before it was stored; a CI check now re-runs the demo on six configurations.">
+<meta property="og:title" content="Case study: AI Decision Engine, a system built to judge its decisions that could overwrite them">
+<meta property="og:description" content="Five defects found in an audit and a later re-verification, each shown beside the README or decision-record line it sat next to, fixed on 2026-07-05 and 2026-07-06; the decision record was clarified, not rewritten.">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F6F2;--paper-2:#ECEFE9;--card:#FFFFFF;
+    --ink:#121A16;--ink-2:#3C4842;--muted:#5E6B64;--faint:#8B968F;--rule:#D8DED8;
+    --stamp:#0C6B52;--stamp-bright:#0E8563;--stamp-soft:#E1EFE8;
+    --warn:#B4881F;--warn-soft:#F7EFDA;
+    --fail:#8A3B2E;--fail-soft:#F6E7E2;
+    --dark:#10201A;--dark-2:#16291F;--dark-ink:#DFE9E2;--dark-muted:#8FA79A;--dark-rule:#24382E;
+    --maxw:880px;--radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--stamp);outline-offset:3px;border-radius:3px}
+  ::selection{background:var(--stamp-soft)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  .display{font-family:"Bricolage Grotesque",sans-serif;letter-spacing:-.015em}
+
+  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--paper) 82%,transparent);border-bottom:1px solid var(--rule)}
+  .nav .in{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .nav a{font-family:"IBM Plex Mono",monospace;font-size:12.5px;text-decoration:none;color:var(--muted)}
+  .nav a:hover{color:var(--stamp)}
+  .nav .brand{color:var(--ink);letter-spacing:.05em;display:flex;align-items:center;gap:10px}
+  .nav .brand .dot{width:9px;height:9px;border-radius:3px;background:var(--stamp)}
+
+  header.case{padding:clamp(56px,9vh,96px) 0 clamp(36px,5vh,56px)}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;color:var(--stamp)}
+  header.case h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(34px,5.6vw,60px);line-height:1.02;letter-spacing:-.02em;margin-top:16px;max-width:18ch}
+  .meta{display:flex;flex-wrap:wrap;gap:0;margin-top:30px;border:1px solid var(--rule);border-radius:8px;background:var(--card);overflow:hidden;font-family:"IBM Plex Mono",monospace;font-size:12px}
+  .meta span{padding:9px 14px;border-right:1px solid var(--rule);color:var(--muted)}
+  .meta span:last-child{border-right:none}
+  .meta .pass{color:var(--stamp);background:var(--stamp-soft);font-weight:500}
+  .meta .fail{color:var(--fail);background:var(--fail-soft);font-weight:500}
+
+  section{padding:clamp(30px,4.5vh,48px) 0}
+  h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:clamp(24px,3vw,32px);letter-spacing:-.015em;margin-bottom:16px}
+  p{max-width:66ch;color:var(--ink-2)}
+  p + p{margin-top:14px}
+  .dim{color:var(--muted)}
+
+  .figures{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;margin:26px 0 8px}
+  .figures div{background:var(--card);padding:22px 20px}
+  .figures .n{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(26px,3vw,38px);line-height:1}
+  .figures .n.bad{color:var(--fail)}
+  .figures .l{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:9px;text-transform:uppercase}
+  .prov{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--faint);margin-top:10px}
+  @media(max-width:760px){.figures{grid-template-columns:repeat(2,1fr)}}
+
+  table{width:100%;border-collapse:collapse;margin-top:22px;background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;font-size:14.5px}
+  table{display:block;overflow-x:auto}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:top;min-width:120px}
+  th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--paper-2)}
+  tr:last-child td{border-bottom:none}
+  td .mono{font-size:13px;background:var(--paper-2);border-radius:5px;padding:2px 7px;white-space:nowrap}
+  td.err{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:#8A3B2E}
+  td.ok{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--stamp)}
+
+  .callout{background:var(--dark);color:var(--dark-ink);border-radius:var(--radius);padding:clamp(26px,4vw,40px);margin-top:26px}
+  .callout .st{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:#E5B96B;border:1px solid #E5B96B;border-radius:5px;padding:4px 9px;display:inline-block;transform:rotate(-1.2deg)}
+  .callout blockquote{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:clamp(18px,2.1vw,23px);line-height:1.45;margin-top:16px;letter-spacing:-.01em}
+  .callout .src{margin-top:12px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--dark-muted)}
+
+  .limits{border:1px dashed var(--warn);background:var(--warn-soft);border-radius:var(--radius);padding:24px 26px;margin-top:22px}
+  .limits h3{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.12em;color:var(--warn);margin-bottom:12px}
+  .limits ul{margin-left:18px;color:var(--ink-2);font-size:15px}
+  .limits li{margin-top:6px}
+
+  .adr{border-left:3px solid var(--stamp);padding:6px 0 6px 22px;margin-top:22px}
+  .adr .t{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--stamp);letter-spacing:.08em}
+  .adr p{margin-top:8px}
+
+  .cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+  .btn{text-decoration:none;font-weight:600;font-size:15px;padding:13px 22px;border-radius:10px;transition:transform .18s}
+  .btn.pri{background:var(--ink);color:var(--paper)}
+  .btn.pri:hover{transform:translateY(-2px)}
+  .btn.sec{border:1px solid var(--rule);background:var(--card)}
+  .btn.sec:hover{border-color:var(--ink)}
+
+  footer{padding:44px 0 60px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12.5px;border-top:1px solid var(--rule);margin-top:40px}
+</style>
+</head>
+
+<body>
+
+<nav class="nav">
+  <div class="wrap in">
+    <a class="brand" href="../index.html"><span class="dot"></span>KRISTIAN KOBESCAK</a>
+    <a href="../index.html">&larr; back to site</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+
+
+<header class="case">
+  <span class="kicker mono">CASE STUDY · AUDIT REMEDIATION · AI DECISION ENGINE</span>
+  <h1 class="display">Built to judge whether its decisions were right, it could quietly overwrite them.</h1>
+  <div class="meta mono">
+    <span>remediation · 2026-07-05 to 2026-07-06</span>
+    <span>CI run 37558629364 · 2026-10-07</span>
+    <span>repo verified @ 70b09bf</span>
+    <span class="pass">RESULT: 6 OF 6 CI JOBS GREEN · NO EVAL GATE</span>
+  </div>
+  <p style="margin-top:22px">A lead-routing pipeline for sales teams that records each AI-assisted routing decision and later scores it against the recorded outcome; its fix commits record that a stored decision could be overwritten, one lead's outcome could be counted twice and a failed validation was discarded before it was stored, and after the fixes the demo passes a CI check on six configurations, on synthetic data.</p>
+</header>
+
+<section>
+  <h2>The problem</h2>
+  <p>The README starts from the premise that many AI lead-routing systems stop at classification. They decide where a lead should go, but they do not measure whether that decision was right. The failure is silent: sales teams receive unqualified leads, real buyers are missed, and nothing exists to detect or correct it.</p>
+  <p>This system records the original decision, accepts the real-world outcome later, and evaluates decision quality over time.</p>
+</section>
+
+<section>
+  <h2>What was built, and the test it is held to</h2>
+  <p>A lead goes through a model classification (OpenAI <span class="mono">gpt-4o-mini</span>), a validation step, a fallback to a safe default when the output fails validation, and routing to one of three decisions: send to sales, archive, or manual review. Each decision is stored in SQLite. The outcome is recorded later, through its own API endpoint, in a separate table. An evaluator joins the two and computes the conversion rate of leads sent to sales, the false-positive rate (leads sent to sales that did not convert), and missed opportunities (archived or manual-review leads that converted). Below 30% outcome coverage it reports "insufficient data" instead of a verdict. The thresholds it checks against are static settings, with defaults of at least 40% conversion, at most 30% false positives and at most 25% manual review.</p>
+  <p>This repository has no eval gate committed before a run. The check it is held to is a regression test, added on 2026-07-27 after the fixes described below. It runs the pipeline and the outcome-seeding script with an empty API key and asserts seven output lines and both exit codes. It runs on Ubuntu, macOS and Windows with Python 3.12 and 3.14, on every push and pull request to main. The expected lines were frozen from fresh-clone runs: two identical runs and one with a varied hash seed, per Python version.</p>
+</section>
+
+<section>
+  <h2>The run</h2>
+  <p>The CI run at the pinned commit, <a href="https://github.com/kobescak-kristian/ai-decision-engine/actions/runs/37558629364" class="mono">37558629364</a>, ran on 2026-10-07 at commit <span class="mono">70b09bf</span>, and all 6 jobs passed. The data is synthetic: a fixed sample of 50 leads. Because the API key is empty, the system runs in simulation mode, and each lead's classification comes from a built-in table of simulated outputs, written to include wrong decisions so the evaluator has something to flag. The 32 outcomes are a fixed list in the seeding script. The first three tiles are output lines the test asserts in every job; the fourth is the CI run result.</p>
+  <div class="figures">
+    <div><div class="n display">50</div><div class="l">Leads processed, 0 fallbacks</div></div>
+    <div><div class="n display">25 / 14 / 11</div><div class="l">To sales / archived / manual review</div></div>
+    <div><div class="n display">64%</div><div class="l">Outcome coverage: 32 of 50</div></div>
+    <div><div class="n display">6 / 6</div><div class="l">CI jobs green: 3 operating systems, 2 Python versions</div></div>
+  </div>
+  <p class="prov">Source: tests/test_ci.py (asserted output lines) · CI run 37558629364 at 70b09bf · synthetic data: a fixed 50-lead sample with simulated model outputs and seeded outcomes, not real CRM records</p>
+  <p style="margin-top:18px">On the same synthetic data, the README reports the evaluator's quality figures: 68% conversion on leads sent to sales, a 32% false-positive rate, 4 missed opportunities, and a "warning" status. Three of the fix commits record live runs in which the evaluator's output matched these figures. The CI check does not assert them.</p>
+</section>
+
+<section>
+  <h2>What the record said, and what the code did</h2>
+  <p>The README's own figures were corrected first. On 2026-06-20 the manual-review count went from 12 to 11, and the conversion rate from 72% to 68%. The commit that changed the conversion rate records that 72% and 32% together are impossible with 25 leads sent to sales; the commit that changed the count gives no reason. Both figures had been in the README since the first commit, on 2026-04-23.</p>
+  <p>An audit followed. Its report is not in the repository, and the repository does not say who ran it; its findings are known from the fix commits of 2026-07-05 and 2026-07-06, recorded in the README's version log as versions 1.1 to 1.4. Each row below sets a defect beside the README or decision-record line nearest to it.</p>
+  <table>
+    <thead><tr><th>The nearest line in the record</th><th>What the code did</th><th>The fix</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>Setup: copy the example settings file; the system "runs in simulation mode without an OPENAI_API_KEY".</td>
+        <td class="err">The example file held a placeholder key, which counted as set, so simulation mode was off. The documented quickstart sent all 50 demo leads to manual review and still exited with success.</td>
+        <td>The example key is empty, a placeholder counts as no key, and the run prints its mode and the reason. <a class="mono" href="https://github.com/kobescak-kristian/ai-decision-engine/commit/f9d3230">f9d3230</a></td>
+      </tr>
+      <tr>
+        <td>The README described the fallback as handling malformed AI responses ("prevents system failure"); nothing covered a rejected key or an unreachable API.</td>
+        <td class="err">A rejected API key silently turned every lead into a manual-review fallback while the run reported success. After that fix, a re-verification found that an unreachable API did the same, with the real error replaced by a generic message.</td>
+        <td>An invalid key, an unreachable API, or three consecutive identical AI-layer failures now stop the run with a non-zero exit and the named cause; the real error is stored as the fallback reason. <a class="mono" href="https://github.com/kobescak-kristian/ai-decision-engine/commit/f9d3230">f9d3230</a> <a class="mono" href="https://github.com/kobescak-kristian/ai-decision-engine/commit/1449b44">1449b44</a></td>
+      </tr>
+      <tr>
+        <td>The decision record: each decision is "one row per lead, written once".</td>
+        <td class="err">When a lead was processed again, saving its decision replaced the earlier row. The audit showed that tuning the threshold and re-qualifying one lead rewrote the history and cleared an active false-positive warning with no new outcome data.</td>
+        <td>Decisions are append-only, one version per re-qualification, and the full history of a lead is readable through the API. <a class="mono" href="https://github.com/kobescak-kristian/ai-decision-engine/commit/b445c94">b445c94</a></td>
+      </tr>
+      <tr>
+        <td>The outcome endpoint records "the real-world outcome for a decision".</td>
+        <td class="err">Nothing stopped a second outcome for the same lead. The audit showed one lead counted as both a conversion and a false positive, with the two rates summing to 104%.</td>
+        <td>One outcome per lead; a second one is rejected with a 409 that names the existing outcome. The seeding script skips recorded leads instead of deleting and re-inserting them. <a class="mono" href="https://github.com/kobescak-kristian/ai-decision-engine/commit/780cdf9">780cdf9</a></td>
+      </tr>
+      <tr>
+        <td>Persistence "creates an audit trail for every decision".</td>
+        <td class="err">An output that failed validation was still kept out of routing, but the code then re-validated the safe default, which always passes, and kept that result. The original failure was discarded before anything was stored; the decisions table had no validation column.</td>
+        <td>Each stored decision keeps its original validation result and error, written once and shown in the audit endpoints. <a class="mono" href="https://github.com/kobescak-kristian/ai-decision-engine/commit/f1546c2">f1546c2</a></td>
+      </tr>
+    </tbody>
+  </table>
+  <p style="margin-top:18px">The decision record was not rewritten to match the code. It gained a dated clarification:</p>
+  <div class="callout">
+    <span class="st mono">CLARIFIED, NOT REWRITTEN</span>
+    <blockquote>"Written once" above described intent, not the original implementation.</blockquote>
+    <p class="src">&rarr; adr/0001, clarification dated 2026-07-06, commit b445c94.</p>
+  </div>
+  <p style="margin-top:22px">The last fix commit left the re-derivation of the README figures to a separate step. No later commit changed the README's Outcome section. The live runs in three fix commits matched its figures, and the CI check added on 2026-07-27 asserts the routing split and the coverage, not the quality figures.</p>
+</section>
+
+<section>
+  <h2>What this proves, and what it does not</h2>
+  <p>It proves that, on synthetic data, the keyless pipeline produces the same routing split, zero fallbacks and the same seeded outcome coverage on six combinations of operating system and Python version, re-checked on every push and pull request.</p>
+  <p>It does not prove the quality of any model's decisions: the CI run never calls the model, the classifications come from a built-in table, and the outcomes are a fixed list written to include wrong decisions. The 68% and 32% describe the evaluator's arithmetic on designed data, not performance on real leads. The fixes themselves (append-only decisions, the 409 on a second outcome, the stored validation state, the abort paths) were verified by live runs: the commit messages state this and summarise the results, and the full output is not in the repository. Of the fixes, the CI check asserts only the two run-summary lines the first fix added: the simulation-mode banner and the fallback count.</p>
+  <div class="limits">
+    <h3 class="mono">KNOWN LIMITATIONS, SELF-DECLARED</h3>
+    <ul>
+      <li>Outcome correction is not supported in this version: an outcome, once recorded, cannot be changed through the API, and a second one is rejected.</li>
+      <li>Below 30% outcome coverage the system reports "insufficient data" instead of a number, so early in a rollout it cannot yet say whether it is working.</li>
+      <li>The coverage gate and the three evaluation thresholds are static settings, not learned; tuning them is a manual step.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>The decision on record</h2>
+  <div class="adr">
+    <span class="t mono">ADR 0001: DECOUPLE DECISIONS AND OUTCOMES, JOIN ASYNC FOR EVALUATION · ACCEPTED · DATED 2026-07-04 · CLARIFIED 2026-07-06</span>
+    <p>Decisions and outcomes are stored in two separate tables, linked only by the lead ID. The decision is made at processing time with the information available then; the outcome arrives later, from a different source. The evaluator computes conversion, false positives and missed opportunities from the joined tables, never from the decision record alone. An outcome for an unknown lead fails loudly instead of creating an orphan record. It was chosen over writing the outcome onto the decision record, which would mix the quality of the decision with the later result and could not show "outcome not known yet". The trade-off is recorded: below 30% coverage there is no quality number, and the thresholds are tuned by hand.</p>
+  </div>
+  <p style="margin-top:18px">The record's status reads "Accepted (implemented)". Its "written once" line did not hold in the code until the 2026-07-06 fix, and the clarification of that date says so and names the versioned append as the mechanism that makes it true. A next step the README points to is outcome correction, which it lists as a known limitation of this version: a recorded outcome cannot be changed through the API.</p>
+  <p>Built with Claude coding agents, which are named as co-authors in the commit history: 20 of the 38 non-merge commits, including all five fix commits of the remediation. Every commit lists Kristian Kobescak as Git author; eight later commits were made from an agent account. The repository records no reviewer or approver, and does not name who ran the audit, the verification runs, or the re-verification that found the first fix incomplete.</p>
+  <div class="cta">
+    <a class="btn pri" href="https://github.com/kobescak-kristian/ai-decision-engine/blob/70b09bf/tests/test_ci.py">Read the CI check in the repo &rarr;</a>
+    <a class="btn sec" href="../index.html#engines">All the systems</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">KRISTIAN KOBESCAK · CASE STUDY · SOURCES: tests/test_ci.py · CI RUN 37558629364 · README, DECISION RECORD AND COMMIT HISTORY IN THE PUBLIC REPO</div>
+</footer>
+
+</body>
+</html>
