@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Case study: AI Decision Engine · Kristian Kobescak</title>
-<meta name="description" content="A lead-routing pipeline that scores its own decisions against later outcomes. Its fix commits record that a stored decision could be overwritten, one lead's outcome could be counted twice, and a failed validation was stored as a pass; a CI check now re-runs the demo on six configurations.">
+<meta name="description" content="A lead-routing pipeline that scores its own decisions against later outcomes. Its fix commits record that a stored decision could be overwritten, one lead's outcome could be counted twice, and a failed validation was discarded before it was stored; a CI check now re-runs the demo on six configurations.">
 <meta property="og:title" content="Case study: AI Decision Engine, a system built to judge its decisions that could overwrite them">
-<meta property="og:description" content="Five defects found in an audit, each shown beside the README or decision-record line it sat next to, fixed on 2026-07-05 and 2026-07-06; the decision record was clarified, not rewritten.">
+<meta property="og:description" content="Five defects found in an audit and a later re-verification, each shown beside the README or decision-record line it sat next to, fixed on 2026-07-05 and 2026-07-06; the decision record was clarified, not rewritten.">
 <meta property="og:type" content="article">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -117,7 +117,7 @@
     <span>repo verified @ 70b09bf</span>
     <span class="pass">RESULT: 6 OF 6 CI JOBS GREEN · NO EVAL GATE</span>
   </div>
-  <p style="margin-top:22px">A lead-routing pipeline for sales teams that records each AI-assisted routing decision and later scores it against the recorded outcome; its fix commits record that a stored decision could be overwritten, one lead's outcome could be counted twice and a failed validation was stored as a pass, and after the fixes the demo passes a CI check on six configurations, on synthetic data.</p>
+  <p style="margin-top:22px">A lead-routing pipeline for sales teams that records each AI-assisted routing decision and later scores it against the recorded outcome; its fix commits record that a stored decision could be overwritten, one lead's outcome could be counted twice and a failed validation was discarded before it was stored, and after the fixes the demo passes a CI check on six configurations, on synthetic data.</p>
 </header>
 
 <section>
@@ -191,7 +191,7 @@
 <section>
   <h2>What this proves, and what it does not</h2>
   <p>It proves that, on synthetic data, the keyless pipeline produces the same routing split, zero fallbacks and the same seeded outcome coverage on six combinations of operating system and Python version, re-checked on every push and pull request.</p>
-  <p>It does not prove the quality of any model's decisions: the CI run never calls the model, the classifications come from a built-in table, and the outcomes are a fixed list written to include wrong decisions. The 68% and 32% describe the evaluator's arithmetic on designed data, not performance on real leads. The fixes themselves (append-only decisions, the 409 on a second outcome, the stored validation state, the abort paths) were verified by live runs: the commit messages state this and summarise the results, and the full output is not in the repository. Of the fixes, the CI check asserts only the simulation-mode banner.</p>
+  <p>It does not prove the quality of any model's decisions: the CI run never calls the model, the classifications come from a built-in table, and the outcomes are a fixed list written to include wrong decisions. The 68% and 32% describe the evaluator's arithmetic on designed data, not performance on real leads. The fixes themselves (append-only decisions, the 409 on a second outcome, the stored validation state, the abort paths) were verified by live runs: the commit messages state this and summarise the results, and the full output is not in the repository. Of the fixes, the CI check asserts only the two run-summary lines the first fix added: the simulation-mode banner and the fallback count.</p>
   <div class="limits">
     <h3 class="mono">KNOWN LIMITATIONS, SELF-DECLARED</h3>
     <ul>
@@ -205,10 +205,10 @@
 <section>
   <h2>The decision on record</h2>
   <div class="adr">
-    <span class="t mono">ADR 0001: DECOUPLE DECISIONS AND OUTCOMES, JOIN ASYNC FOR EVALUATION · ACCEPTED 2026-07-04 · CLARIFIED 2026-07-06</span>
+    <span class="t mono">ADR 0001: DECOUPLE DECISIONS AND OUTCOMES, JOIN ASYNC FOR EVALUATION · ACCEPTED · DATED 2026-07-04 · CLARIFIED 2026-07-06</span>
     <p>Decisions and outcomes are stored in two separate tables, linked only by the lead ID. The decision is made at processing time with the information available then; the outcome arrives later, from a different source. The evaluator computes conversion, false positives and missed opportunities from the joined tables, never from the decision record alone. An outcome for an unknown lead fails loudly instead of creating an orphan record. It was chosen over writing the outcome onto the decision record, which would mix the quality of the decision with the later result and could not show "outcome not known yet". The trade-off is recorded: below 30% coverage there is no quality number, and the thresholds are tuned by hand.</p>
   </div>
-  <p style="margin-top:18px">The record's status reads "Accepted (implemented)". Its "written once" line did not hold in the code until the 2026-07-06 fix, and the clarification of that date says so and names the versioned append as the mechanism that makes it true. A next step the record points to is outcome correction, which the README lists as a known limitation of this version: a recorded outcome cannot be changed through the API.</p>
+  <p style="margin-top:18px">The record's status reads "Accepted (implemented)". Its "written once" line did not hold in the code until the 2026-07-06 fix, and the clarification of that date says so and names the versioned append as the mechanism that makes it true. A next step the README points to is outcome correction, which it lists as a known limitation of this version: a recorded outcome cannot be changed through the API.</p>
   <p>Built with Claude coding agents, which are named as co-authors in the commit history: 20 of the 38 non-merge commits, including all five fix commits of the remediation. Every commit lists Kristian Kobescak as Git author; eight later commits were made from an agent account. The repository records no reviewer or approver, and does not name who ran the audit, the verification runs, or the re-verification that found the first fix incomplete.</p>
   <div class="cta">
     <a class="btn pri" href="https://github.com/kobescak-kristian/ai-decision-engine/blob/70b09bf/tests/test_ci.py">Read the CI check in the repo &rarr;</a>
