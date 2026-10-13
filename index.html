@@ -372,18 +372,10 @@
       <article class="card rv">
         <div class="top"><span class="flag mono">ADVANCED SYSTEM</span><span class="hash">eval-05fbe4ee · re-run eval-199f77c6</span></div>
         <h3>AI Claim Verification Agent</h3>
-        <p>A bounded agent that checks a page's factual claims against source pages. Four read-only tools and nothing else, a 20-turn cap, a per-run cost ceiling, and a SQLite audit trail written before each tool result reaches the model. A synthetic evaluation over 12 cases and 35 claims is published in the repository. Until 2026-10-13, 8 of its 12 case directory names contained a verdict word that reached the model; the re-run with neutral names, same scorer, thresholds and model, scored precision 1.00 and recall 1.00 again, 35 of 35. The cases remain synthetic, so the scores are not evidence of accuracy on real pages.</p>
+        <p>A bounded agent that checks a page's factual claims against source pages. Four read-only tools and nothing else, a 20-turn cap, a per-run cost ceiling, and a SQLite audit trail written before each tool result reaches the model. A synthetic evaluation over 12 cases and 35 claims is published in the repository. Until 2026-10-13, 8 of its 12 case directory names contained a verdict word that reached the model; the re-run with neutral names, same scorer, thresholds and model, scored precision 1.00 and recall 1.00 again, 35 of 35. Rebuilt on LangGraph to test whether its limits survive a framework change, the same test gave the same score, and the cost ceiling still had to be hand-built, because the framework has no limit in money. The cases remain synthetic, so the scores are not evidence of accuracy on real pages.</p>
         <a class="go mono" href="case-studies/ai-claim-verification-agent.html" style="color:var(--stamp)">Read the case study <span>→</span></a>
+        <a class="go mono" href="case-studies/ai-claim-verification-langgraph.html" style="color:var(--stamp);padding-top:2px">The LangGraph version: read its case study <span>→</span></a>
         <a class="go mono" href="https://github.com/kobescak-kristian/ai-claim-verification-agent">github.com/kobescak-kristian/ai-claim-verification-agent <span>→</span></a>
-      </article>
-
-      <article class="card rv" id="c-langgraph" style="grid-column:1 / -1">
-        <div class="top"><span class="flag mono">EXPERIMENT</span><span class="hash">parity run p3-official-2026-07-20 · re-run official-rerun-2026-10-13</span></div>
-        <h3>AI Claim Verification on LangGraph</h3>
-        <p>The claim-verification agent rebuilt on LangGraph and held to the same frozen eval, so that only the framework changes. It matched the original, precision 1.00 and recall 1.00, 35 of 35, on the 2026-07-20 run and again on the 2026-10-13 re-run with neutral case names. The harness grew from 509 to 585 lines: the framework carries the tool list and the turn cap, while the cost ceiling and the call-count breaker are hand-built. The cases are synthetic, so the scores are not evidence of accuracy on real pages.</p>
-        <a class="go mono" href="case-studies/ai-claim-verification-langgraph.html" style="color:var(--stamp)">Read the case study <span>→</span></a>
-        <a class="go mono" href="https://github.com/kobescak-kristian/ai-claim-verification-langgraph/blob/main/COMPARISON.md" style="color:var(--stamp);padding-top:2px">The framework comparison <span>→</span></a>
-        <a class="go mono" href="https://github.com/kobescak-kristian/ai-claim-verification-langgraph" style="padding-top:2px">github.com/kobescak-kristian/ai-claim-verification-langgraph <span>→</span></a>
       </article>
 
       <article class="card rv" id="c-context">
