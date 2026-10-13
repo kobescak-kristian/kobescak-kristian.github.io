@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case study: AI Claim Verification Agent · Kristian Kobescak</title>
+<meta name="description" content="A bounded agent that checks a page's factual claims against source pages with four read-only tools. It passed its precision and recall gate with 35 of 35 claims correct on synthetic pages; eight of the twelve test folder names contained a verdict word, and the re-run with neutral names scored the same.">
+<meta property="og:title" content="Case study: AI Claim Verification Agent, a perfect score on synthetic cases, re-run without the verdict words in its folder names">
+<meta property="og:description" content="Gate committed before the agent code, 35 of 35 synthetic claims on the first official run, verdict words found in eight test folder names, and a re-run on neutral names recorded beside the original, its higher reported cost stated and not attributed.">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F6F2;--paper-2:#ECEFE9;--card:#FFFFFF;
+    --ink:#121A16;--ink-2:#3C4842;--muted:#5E6B64;--faint:#8B968F;--rule:#D8DED8;
+    --stamp:#0C6B52;--stamp-bright:#0E8563;--stamp-soft:#E1EFE8;
+    --warn:#B4881F;--warn-soft:#F7EFDA;
+    --fail:#8A3B2E;--fail-soft:#F6E7E2;
+    --dark:#10201A;--dark-2:#16291F;--dark-ink:#DFE9E2;--dark-muted:#8FA79A;--dark-rule:#24382E;
+    --maxw:880px;--radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--stamp);outline-offset:3px;border-radius:3px}
+  ::selection{background:var(--stamp-soft)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  .display{font-family:"Bricolage Grotesque",sans-serif;letter-spacing:-.015em}
+
+  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--paper) 82%,transparent);border-bottom:1px solid var(--rule)}
+  .nav .in{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .nav a{font-family:"IBM Plex Mono",monospace;font-size:12.5px;text-decoration:none;color:var(--muted)}
+  .nav a:hover{color:var(--stamp)}
+  .nav .brand{color:var(--ink);letter-spacing:.05em;display:flex;align-items:center;gap:10px}
+  .nav .brand .dot{width:9px;height:9px;border-radius:3px;background:var(--stamp)}
+
+  header.case{padding:clamp(56px,9vh,96px) 0 clamp(36px,5vh,56px)}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;color:var(--stamp)}
+  header.case h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(34px,5.6vw,60px);line-height:1.02;letter-spacing:-.02em;margin-top:16px;max-width:18ch}
+  .meta{display:flex;flex-wrap:wrap;gap:0;margin-top:30px;border:1px solid var(--rule);border-radius:8px;background:var(--card);overflow:hidden;font-family:"IBM Plex Mono",monospace;font-size:12px}
+  .meta span{padding:9px 14px;border-right:1px solid var(--rule);color:var(--muted)}
+  .meta span:last-child{border-right:none}
+  .meta .pass{color:var(--stamp);background:var(--stamp-soft);font-weight:500}
+  .meta .fail{color:var(--fail);background:var(--fail-soft);font-weight:500}
+
+  section{padding:clamp(30px,4.5vh,48px) 0}
+  h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:clamp(24px,3vw,32px);letter-spacing:-.015em;margin-bottom:16px}
+  p{max-width:66ch;color:var(--ink-2)}
+  p + p{margin-top:14px}
+  .dim{color:var(--muted)}
+
+  .figures{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;margin:26px 0 8px}
+  .figures div{background:var(--card);padding:22px 20px}
+  .figures .n{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(26px,3vw,38px);line-height:1}
+  .figures .n.bad{color:var(--fail)}
+  .figures .l{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:9px;text-transform:uppercase}
+  .prov{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--faint);margin-top:10px}
+  @media(max-width:760px){.figures{grid-template-columns:repeat(2,1fr)}}
+
+  table{width:100%;border-collapse:collapse;margin-top:22px;background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;font-size:14.5px}
+  table{display:block;overflow-x:auto}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:top;min-width:120px}
+  th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--paper-2)}
+  tr:last-child td{border-bottom:none}
+  td .mono{font-size:13px;background:var(--paper-2);border-radius:5px;padding:2px 7px;white-space:nowrap}
+  td.err{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:#8A3B2E}
+  td.ok{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--stamp)}
+
+  .callout{background:var(--dark);color:var(--dark-ink);border-radius:var(--radius);padding:clamp(26px,4vw,40px);margin-top:26px}
+  .callout .st{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:#E5B96B;border:1px solid #E5B96B;border-radius:5px;padding:4px 9px;display:inline-block;transform:rotate(-1.2deg)}
+  .callout blockquote{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:clamp(18px,2.1vw,23px);line-height:1.45;margin-top:16px;letter-spacing:-.01em}
+  .callout .src{margin-top:12px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--dark-muted)}
+
+  .limits{border:1px dashed var(--warn);background:var(--warn-soft);border-radius:var(--radius);padding:24px 26px;margin-top:22px}
+  .limits h3{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.12em;color:var(--warn);margin-bottom:12px}
+  .limits ul{margin-left:18px;color:var(--ink-2);font-size:15px}
+  .limits li{margin-top:6px}
+
+  .adr{border-left:3px solid var(--stamp);padding:6px 0 6px 22px;margin-top:22px}
+  .adr .t{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--stamp);letter-spacing:.08em}
+  .adr p{margin-top:8px}
+
+  .cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+  .btn{text-decoration:none;font-weight:600;font-size:15px;padding:13px 22px;border-radius:10px;transition:transform .18s}
+  .btn.pri{background:var(--ink);color:var(--paper)}
+  .btn.pri:hover{transform:translateY(-2px)}
+  .btn.sec{border:1px solid var(--rule);background:var(--card)}
+  .btn.sec:hover{border-color:var(--ink)}
+
+  footer{padding:44px 0 60px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12.5px;border-top:1px solid var(--rule);margin-top:40px}
+</style>
+</head>
+
+<body>
+
+<nav class="nav">
+  <div class="wrap in">
+    <a class="brand" href="../index.html"><span class="dot"></span>KRISTIAN KOBESCAK</a>
+    <a href="../index.html">&larr; back to site</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+
+<header class="case">
+  <span class="kicker mono">CASE STUDY · BOUNDED AGENT · AI CLAIM VERIFICATION AGENT</span>
+  <h1 class="display">It scored 35 of 35 while eight of its test folder names contained a verdict word.</h1>
+  <div class="meta mono">
+    <span>gate run · 2026-07-06 · eval-05fbe4ee</span>
+    <span>neutral-name re-run · 2026-10-13 · eval-199f77c6</span>
+    <span>repo verified @ bd6184e</span>
+    <span class="pass">RESULT: GATE PASS ON BOTH RUNS · PRECISION 1.00 · RECALL 1.00</span>
+  </div>
+  <p style="margin-top:22px">An agent that checks the factual claims on pages such as affiliate reviews and product pages against their sources, with four read-only tools and nothing else, passed its precision and recall gate on 12 synthetic cases with all 35 claims correct, before and after verdict words were removed from eight test folder names.</p>
+</header>
+
+<section>
+  <h2>The problem</h2>
+  <p>Affiliate reviews, comparisons and product pages make factual claims (prices, specs, availability, release dates) that should match their sources but often go unchecked. Checking by hand is slow, and it is the first thing skipped when a deadline is close.</p>
+  <p>An AI agent could do the checking, but the README names the catch: an agent that can act freely near live content is a liability, because one bad decision can publish, edit or send something it should not. The README's answer is an agent that investigates on its own and can do nothing else.</p>
+</section>
+
+<section>
+  <h2>What was built, and the test it was held to</h2>
+  <p>The agent takes one target page and its source pages, extracts the target's claims, investigates each one against the sources, and logs one verdict per claim: SUPPORTED, CONTRADICTED or UNVERIFIABLE, with the evidence source. It is built on the Claude Agent SDK, and the bounds sit in the harness code, not in the prompt: the only tools the model can call are four custom ones (<span class="mono">fetch_page</span>, <span class="mono">extract_claims</span>, <span class="mono">compare_source</span>, <span class="mono">log_finding</span>), every built-in tool is switched off, a run stops at 20 turns, the SDK enforces a per-run cost ceiling, and a separate counter in the tool code stops a run after 60 tool calls. Hooks before and after every tool call write it to a local SQLite audit log. The page tools only read local HTML under the dataset folder and reject any path outside it. No tool decides a verdict; the model reads the source text and decides.</p>
+  <p>The gate was committed before the agent existed. The thresholds (precision at least 0.95 and recall at least 0.90) were committed on 2026-07-05 (<a class="mono" href="https://github.com/kobescak-kristian/ai-claim-verification-agent/commit/b041702">b041702</a>); the 12 synthetic cases and their answer key (<a class="mono" href="https://github.com/kobescak-kristian/ai-claim-verification-agent/commit/767352b">767352b</a>), then the metric definition and the comparison policy (<a class="mono" href="https://github.com/kobescak-kristian/ai-claim-verification-agent/commit/2205665">2205665</a>), followed early on 2026-07-06; the agent code came after them (<a class="mono" href="https://github.com/kobescak-kristian/ai-claim-verification-agent/commit/a420efb">a420efb</a>), then the eval runner (<a class="mono" href="https://github.com/kobescak-kristian/ai-claim-verification-agent/commit/6175a6f">6175a6f</a>), then the official run (<a class="mono" href="https://github.com/kobescak-kristian/ai-claim-verification-agent/commit/bc9f41a">bc9f41a</a>). The positive class is CONTRADICTED: precision asks how many of the claims the agent called contradicted really were, recall how many of the 8 truly contradicted claims it caught. Overall accuracy across all 35 claims is reported, not gated, and a claim left without a verdict is scored wrong. The policy the agent is prompted with is the same file the answer key follows: numbers must match exactly, a rephrased fact counts as the same fact, manufacturer and retailer sources outrank forum posts, and a claim no source mentions is UNVERIFIABLE, not CONTRADICTED. Three cases are built as traps: a near-match number (sources say 11.5 hours, the page says 12), a price spelled out in words, and a forum post that repeats the page's figure against the manufacturer's spec sheet.</p>
+</section>
+
+<section>
+  <h2>The run</h2>
+  <p>The official gate run, <span class="mono">eval-05fbe4ee</span>, ran on 2026-07-06 with Claude Sonnet 4.6, one fresh agent invocation per case. Every one of the 35 verdicts matched the answer key. No case hit the turn cap or the cost ceiling; cases took 7 to 11 turns, and the run cost $0.9047 in total, against a ceiling of $1.50 per case. An earlier shakedown run on Claude Haiku 4.5 gave the same verdicts.</p>
+  <div class="figures">
+    <div><div class="n display">8 / 8</div><div class="l">Precision 1.00, gate 0.95</div></div>
+    <div><div class="n display">8 / 8</div><div class="l">Recall 1.00, gate 0.90</div></div>
+    <div><div class="n display">35 / 35</div><div class="l">Verdicts correct, not gated</div></div>
+    <div><div class="n display">$0.9047</div><div class="l">Run cost, 12 cases</div></div>
+  </div>
+  <p class="prov">Source: evals/EVAL_RESULTS.md and evals/results/eval-05fbe4ee.json · Sonnet 4.6 · 2026-07-06 · synthetic data: 12 hand-written local HTML cases with a fixed answer key, not live web pages</p>
+  <p style="margin-top:18px">The cost is the CLI's own accounting: the repository runs on a Claude subscription login through the Claude CLI, not on a per-token API bill.</p>
+</section>
+
+<section>
+  <h2>What the record shows was wrong</h2>
+  <p>The first attempt at the gate run crashed. The cost ceiling, $0.25 per case, had been set for the cheap Haiku development runs; the first Sonnet attempt hit it in the middle of a turn on case 1, and the SDK raised a hard error instead of returning a capped result. The results file records it as a real gap in the harness, caught by the run crashing and not by the eval runner. The fix: the runner catches that error and scores the case's claims as unresolved, which counts as wrong, and eval runs got their own ceiling of $1.50 per case.</p>
+  <p>The larger problem was in the test folder names. Until 2026-10-13, 8 of the 12 case folder names contained a verdict word, and the folder name reached the model in the target and source paths of the prompt; the <span class="mono">fetch_page</span> tool description also carried one of the old names, <span class="mono">case_01_supported_wireless_earbuds</span>, as a fixed example path. In six of the eight, the name also carried the topic of the claim with that verdict. Since 2026-09-22 (<a class="mono" href="https://github.com/kobescak-kristian/kobescak-kristian.github.io/commit/664ea27">664ea27</a>) the portfolio site's card for this agent had said its evaluation was confounded by the folder names and did not present its scores as blind accuracy evidence.</p>
+  <table>
+    <thead><tr><th>Folder name until 2026-10-13</th><th>True verdicts in the case</th><th>Since</th></tr></thead>
+    <tbody>
+      <tr><td class="err">case_01_supported_wireless_earbuds</td><td>3 supported</td><td class="ok">case_01</td></tr>
+      <tr><td class="err">case_02_contradicted_price_laptop</td><td>price contradicted, 2 supported</td><td class="ok">case_02</td></tr>
+      <tr><td class="err">case_03_contradicted_storage_phone</td><td>storage contradicted, 2 supported</td><td class="ok">case_03</td></tr>
+      <tr><td class="err">case_04_contradicted_release_date_camera</td><td>release date contradicted, 2 supported</td><td class="ok">case_04</td></tr>
+      <tr><td class="err">case_05_unverifiable_warranty_monitor</td><td>warranty unverifiable, 2 supported</td><td class="ok">case_05</td></tr>
+      <tr><td class="err">case_06_unverifiable_availability_speaker</td><td>availability unverifiable, 2 supported</td><td class="ok">case_06</td></tr>
+      <tr><td>case_07_adversarial_near_match_battery_earbuds</td><td>battery contradicted, 1 supported</td><td class="ok">case_07</td></tr>
+      <tr><td>case_08_adversarial_rephrased_price_tablet</td><td>2 supported</td><td class="ok">case_08</td></tr>
+      <tr><td>case_09_mixed_multi_claim_router</td><td>2 contradicted, 1 unverifiable, 1 supported</td><td class="ok">case_09</td></tr>
+      <tr><td class="err">case_10_supported_specs_bundle_keyboard</td><td>4 supported</td><td class="ok">case_10</td></tr>
+      <tr><td class="err">case_11_contradicted_availability_gpu</td><td>availability contradicted, 2 supported</td><td class="ok">case_11</td></tr>
+      <tr><td>case_12_adversarial_authoritative_conflict_smartwatch</td><td>battery contradicted, 1 supported</td><td class="ok">case_12</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:18px">On 2026-10-13 the folders were renamed <span class="mono">case_01</span> to <span class="mono">case_12</span>. The answer key changed by name substitution only; claims, verdicts, scorer, thresholds and model did not. The test suite gained a check that fails if any dataset file or folder name contains a verdict word. Then the frozen eval was run again: same scorer, thresholds, model, per-case ceiling and turn cap, one fresh invocation per case, no case re-run.</p>
+  <div class="callout">
+    <span class="st mono">RE-RUN ON NEUTRAL NAMES · 2026-10-13</span>
+    <blockquote>Precision 1.00 (8/8), recall 1.00 (8/8), 35 of 35 verdicts correct, no case capped. Gate PASS.</blockquote>
+    <p class="src">&rarr; evals/rerun_2026-10-13.md and evals/results/eval-199f77c6.json, run eval-199f77c6, recorded beside the July results file, whose figures are unchanged. Synthetic data: the same 12 hand-written cases.</p>
+  </div>
+  <p style="margin-top:22px">One thing in the re-run is not explained. The CLI reported $2.8431 for it, against $0.9047 in July, and cases took 7 to 14 turns instead of 7 to 11; every case stayed under the $1.50 ceiling. The Agent SDK and the CLI it runs are not version-pinned, and neither run recorded the versions it used, so the record states the difference and does not attribute it.</p>
+</section>
+
+<section>
+  <h2>What this proves, and what it does not</h2>
+  <p>It proves that on 12 hand-written cases the agent passes a gate fixed before it was built, with every verdict correct, and still does when the folder names no longer carry verdict words. It does not show whether the model used those words in July; it shows that the agent, with the same scorer, thresholds and model, scores the same without them. One bound is tested in CI: a 25-test suite, which <a class="mono" href="https://github.com/kobescak-kristian/ai-claim-verification-agent/blob/bd6184e/.github/workflows/ci.yml">CI</a> runs on Ubuntu, macOS and Windows with Python 3.12 and 3.14 on every push and pull request to main, checks that paths outside the dataset folder, including escape attempts, are rejected. Two of the 25 tests read a local audit log, which is not committed, so they skip in CI and a reader cannot re-run them: one checks that every path the pinned eval run touched stayed inside the dataset folder, the other that the answer file's name and claim IDs never reached the model. The tool list, the turn cap, the cost ceiling and the call counter are set in code and not tested.</p>
+  <p>It does not prove the agent works on real web pages: the cases are clean local HTML, with none of the ads, nested markup or script-rendered content of real pages. It is not a tight estimate either: both runs caught all 8 contradicted claims, but with only 8, one miss would have meant 7 of 8 (0.875), below the 0.90 gate. And the trap cases were written by the same person who wrote the comparison policy the agent is prompted with, so the eval and the prompt may be tuned to each other; renaming the folders does not change that.</p>
+  <div class="limits">
+    <h3 class="mono">KNOWN LIMITATIONS, SELF-DECLARED</h3>
+    <ul>
+      <li>All 12 cases are synthetic, hand-written local HTML, chosen for exact ground truth; the eval cannot yet speak to real-world page noise.</li>
+      <li>12 cases and 35 claims catch gross failures and test the three trap patterns; they do not give a statistically tight precision or recall.</li>
+      <li>Claim types not represented are untested: ranges, conditional claims, claims spread over several paragraphs, and partial disagreement across three or more sources.</li>
+      <li>The agent cannot fix what it finds; a verdict needs a person to act on it.</li>
+      <li>The Agent SDK and its CLI are not version-pinned, and runs do not record the versions they used.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>The decision on record</h2>
+  <div class="adr">
+    <span class="t mono">ADR 0001: BOUNDED AGENT V2, READ-ONLY WHITELIST, AND WHY THIS REPO IS FULLY PUBLIC · DATED 2026-07-05 · ACCEPTED 2026-07-06 ON THE FIRST AGENT COMMIT</span>
+    <p>The earlier engines in the portfolio follow a rule in which deterministic code acts and the AI only recommends. An agent breaks that frame: the model must choose its own next step, or it is just a pipeline. So the risk to bound is not that the AI decides, but that it decides something irreversible. The rule here: the model may choose the next read-only investigative action from a fixed whitelist of four tools, within hard limits on steps and cost, and may never publish, edit, send or make an irreversible change, with the bounds enforced in the harness. The record also makes this repository fully public, prompts included, because for an agent the prompts and bounds are the work. The trade-offs are written down: the agent cannot fix what it finds, and public prompts can be copied.</p>
+  </div>
+  <p style="margin-top:18px">The next step the repository records as open is demo assets, a recording or GIF: its second decision record, on the demo script, puts them in scope, and they are not shipped until they exist.</p>
+  <p>Claude coding agents are named as co-authors on 19 of the 49 non-merge commits, all from 2026-07-07 onward, including the folder rename, the re-run and its record; three more were committed from an agent account without that line. The first build commits of 2026-07-05 and 2026-07-06 (the gate, the dataset, the agent code and the official run) carry no co-author line. Every commit but one lists Kristian Kobescak as Git author (the exception is authored by Claude), and the pull requests for the rename and the re-run were merged from the owner's account. No review is recorded on those pull requests, and the repository does not say who ran the re-run.</p>
+  <div class="cta">
+    <a class="btn pri" href="https://github.com/kobescak-kristian/ai-claim-verification-agent/blob/bd6184e/evals/rerun_2026-10-13.md">Read the re-run record in the repo &rarr;</a>
+    <a class="btn sec" href="https://github.com/kobescak-kristian/ai-claim-verification-agent/blob/bd6184e/evals/EVAL_RESULTS.md">The July gate run</a>
+    <a class="btn sec" href="../index.html#engines">All the systems</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">KRISTIAN KOBESCAK · CASE STUDY · SOURCES: evals/EVAL_RESULTS.md · evals/rerun_2026-10-13.md · RUNS eval-05fbe4ee AND eval-199f77c6 · README, DECISION RECORD, TESTS AND COMMIT HISTORY IN THE PUBLIC REPO</div>
+</footer>
+
+</body>
+</html>
