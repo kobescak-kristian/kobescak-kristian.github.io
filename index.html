@@ -377,6 +377,15 @@
         <a class="go mono" href="https://github.com/kobescak-kristian/ai-claim-verification-agent">github.com/kobescak-kristian/ai-claim-verification-agent <span>→</span></a>
       </article>
 
+      <article class="card rv" id="c-langgraph" style="grid-column:1 / -1">
+        <div class="top"><span class="flag mono">EXPERIMENT</span><span class="hash">parity run p3-official-2026-07-20 · re-run official-rerun-2026-10-13</span></div>
+        <h3>AI Claim Verification on LangGraph</h3>
+        <p>The claim-verification agent rebuilt on LangGraph and held to the same frozen eval, so that only the framework changes. It matched the original, precision 1.00 and recall 1.00, 35 of 35, on the 2026-07-20 run and again on the 2026-10-13 re-run with neutral case names. The harness grew from 509 to 585 lines: the framework carries the tool list and the turn cap, while the cost ceiling and the call-count breaker are hand-built. The cases are synthetic, so the scores are not evidence of accuracy on real pages.</p>
+        <a class="go mono" href="case-studies/ai-claim-verification-langgraph.html" style="color:var(--stamp)">Read the case study <span>→</span></a>
+        <a class="go mono" href="https://github.com/kobescak-kristian/ai-claim-verification-langgraph/blob/main/COMPARISON.md" style="color:var(--stamp);padding-top:2px">The framework comparison <span>→</span></a>
+        <a class="go mono" href="https://github.com/kobescak-kristian/ai-claim-verification-langgraph" style="padding-top:2px">github.com/kobescak-kristian/ai-claim-verification-langgraph <span>→</span></a>
+      </article>
+
       <article class="card rv" id="c-context">
         <div class="top"><span class="flag mono">WORKFLOW CAPABILITY</span><span class="hash">audited 2026-07 @ 8ad6e07</span></div>
         <h3>AI Context Engine</h3>
