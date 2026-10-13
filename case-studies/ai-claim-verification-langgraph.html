@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Case study: AI Claim Verification on LangGraph · Kristian Kobescak</title>
+<meta name="description" content="The bounded claim-verification agent rebuilt on LangGraph and held to the same frozen eval. It scored the same as the original, precision and recall 1.00 on 35 synthetic claims, and again with neutral test folder names; the harness grew from 509 to 585 lines, and a prediction made before the port placed two of the five safety limits wrongly.">
+<meta property="og:title" content="Case study: AI Claim Verification on LangGraph, the same score after a framework port, and a harness that grew from 509 to 585 lines">
+<meta property="og:description" content="Parity contract and framework predictions committed before the port, the same frozen synthetic eval passed 35 of 35, two wrong predictions published, and a re-run on neutral folder names recorded beside the original.">
+<meta property="og:type" content="article">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F4F6F2;--paper-2:#ECEFE9;--card:#FFFFFF;
+    --ink:#121A16;--ink-2:#3C4842;--muted:#5E6B64;--faint:#8B968F;--rule:#D8DED8;
+    --stamp:#0C6B52;--stamp-bright:#0E8563;--stamp-soft:#E1EFE8;
+    --warn:#B4881F;--warn-soft:#F7EFDA;
+    --fail:#8A3B2E;--fail-soft:#F6E7E2;
+    --dark:#10201A;--dark-2:#16291F;--dark-ink:#DFE9E2;--dark-muted:#8FA79A;--dark-rule:#24382E;
+    --maxw:880px;--radius:14px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:17px;line-height:1.7;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  a:focus-visible{outline:2px solid var(--stamp);outline-offset:3px;border-radius:3px}
+  ::selection{background:var(--stamp-soft)}
+  .wrap{max-width:var(--maxw);margin:0 auto;padding:0 clamp(20px,4vw,40px)}
+  .mono{font-family:"IBM Plex Mono",monospace}
+  .display{font-family:"Bricolage Grotesque",sans-serif;letter-spacing:-.015em}
+
+  .nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(14px);background:color-mix(in srgb,var(--paper) 82%,transparent);border-bottom:1px solid var(--rule)}
+  .nav .in{display:flex;align-items:center;justify-content:space-between;height:60px}
+  .nav a{font-family:"IBM Plex Mono",monospace;font-size:12.5px;text-decoration:none;color:var(--muted)}
+  .nav a:hover{color:var(--stamp)}
+  .nav .brand{color:var(--ink);letter-spacing:.05em;display:flex;align-items:center;gap:10px}
+  .nav .brand .dot{width:9px;height:9px;border-radius:3px;background:var(--stamp)}
+
+  header.case{padding:clamp(56px,9vh,96px) 0 clamp(36px,5vh,56px)}
+  .kicker{font-family:"IBM Plex Mono",monospace;font-size:12px;letter-spacing:.14em;color:var(--stamp)}
+  header.case h1{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(34px,5.6vw,60px);line-height:1.02;letter-spacing:-.02em;margin-top:16px;max-width:18ch}
+  .meta{display:flex;flex-wrap:wrap;gap:0;margin-top:30px;border:1px solid var(--rule);border-radius:8px;background:var(--card);overflow:hidden;font-family:"IBM Plex Mono",monospace;font-size:12px}
+  .meta span{padding:9px 14px;border-right:1px solid var(--rule);color:var(--muted)}
+  .meta span:last-child{border-right:none}
+  .meta .pass{color:var(--stamp);background:var(--stamp-soft);font-weight:500}
+  .meta .fail{color:var(--fail);background:var(--fail-soft);font-weight:500}
+
+  section{padding:clamp(30px,4.5vh,48px) 0}
+  h2{font-family:"Bricolage Grotesque",sans-serif;font-weight:700;font-size:clamp(24px,3vw,32px);letter-spacing:-.015em;margin-bottom:16px}
+  p{max-width:66ch;color:var(--ink-2)}
+  p + p{margin-top:14px}
+  .dim{color:var(--muted)}
+
+  .figures{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;margin:26px 0 8px}
+  .figures div{background:var(--card);padding:22px 20px}
+  .figures .n{font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:clamp(26px,3vw,38px);line-height:1}
+  .figures .n.bad{color:var(--fail)}
+  .figures .l{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.06em;color:var(--muted);margin-top:9px;text-transform:uppercase}
+  .prov{font-family:"IBM Plex Mono",monospace;font-size:11.5px;color:var(--faint);margin-top:10px}
+  @media(max-width:760px){.figures{grid-template-columns:repeat(2,1fr)}}
+
+  table{width:100%;border-collapse:collapse;margin-top:22px;background:var(--card);border:1px solid var(--rule);border-radius:var(--radius);overflow:hidden;font-size:14.5px}
+  table{display:block;overflow-x:auto}
+  th,td{text-align:left;padding:12px 14px;border-bottom:1px solid var(--rule);vertical-align:top;min-width:120px}
+  th{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);background:var(--paper-2)}
+  tr:last-child td{border-bottom:none}
+  td .mono{font-size:13px;background:var(--paper-2);border-radius:5px;padding:2px 7px;white-space:nowrap}
+  td.err{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:#8A3B2E}
+  td.ok{font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--stamp)}
+
+  .callout{background:var(--dark);color:var(--dark-ink);border-radius:var(--radius);padding:clamp(26px,4vw,40px);margin-top:26px}
+  .callout .st{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.12em;color:#E5B96B;border:1px solid #E5B96B;border-radius:5px;padding:4px 9px;display:inline-block;transform:rotate(-1.2deg)}
+  .callout blockquote{font-family:"Bricolage Grotesque",sans-serif;font-weight:600;font-size:clamp(18px,2.1vw,23px);line-height:1.45;margin-top:16px;letter-spacing:-.01em}
+  .callout .src{margin-top:12px;font-family:"IBM Plex Mono",monospace;font-size:12.5px;color:var(--dark-muted)}
+
+  .limits{border:1px dashed var(--warn);background:var(--warn-soft);border-radius:var(--radius);padding:24px 26px;margin-top:22px}
+  .limits h3{font-family:"IBM Plex Mono",monospace;font-size:11.5px;letter-spacing:.12em;color:var(--warn);margin-bottom:12px}
+  .limits ul{margin-left:18px;color:var(--ink-2);font-size:15px}
+  .limits li{margin-top:6px}
+
+  .adr{border-left:3px solid var(--stamp);padding:6px 0 6px 22px;margin-top:22px}
+  .adr .t{font-family:"IBM Plex Mono",monospace;font-size:12px;color:var(--stamp);letter-spacing:.08em}
+  .adr p{margin-top:8px}
+
+  .cta{display:flex;flex-wrap:wrap;gap:14px;margin-top:34px}
+  .btn{text-decoration:none;font-weight:600;font-size:15px;padding:13px 22px;border-radius:10px;transition:transform .18s}
+  .btn.pri{background:var(--ink);color:var(--paper)}
+  .btn.pri:hover{transform:translateY(-2px)}
+  .btn.sec{border:1px solid var(--rule);background:var(--card)}
+  .btn.sec:hover{border-color:var(--ink)}
+
+  footer{padding:44px 0 60px;color:var(--muted);font-family:"IBM Plex Mono",monospace;font-size:12.5px;border-top:1px solid var(--rule);margin-top:40px}
+</style>
+</head>
+
+<body>
+
+<nav class="nav">
+  <div class="wrap in">
+    <a class="brand" href="../index.html"><span class="dot"></span>KRISTIAN KOBESCAK</a>
+    <a href="../index.html">&larr; back to site</a>
+  </div>
+</nav>
+
+<main class="wrap">
+
+
+<header class="case">
+  <span class="kicker mono">CASE STUDY · FRAMEWORK PORT · AI CLAIM VERIFICATION ON LANGGRAPH</span>
+  <h1 class="display">Rebuilt on LangGraph, it scored the same, and its harness grew from 509 to 585 lines instead of shrinking.</h1>
+  <div class="meta mono">
+    <span>parity run · 2026-07-20 · p3-official-2026-07-20</span>
+    <span>neutral-name re-run · 2026-10-13 · official-rerun-2026-10-13</span>
+    <span>repo verified @ f969a98</span>
+    <span class="pass">RESULT: GATE PASS ON BOTH RUNS · PRECISION 1.00 · RECALL 1.00</span>
+  </div>
+  <p style="margin-top:22px">Rebuilt on the LangGraph framework, the agent that checks facts on product pages and reviews against their sources passed the original's fixed test on 12 synthetic cases, all 35 claims right, before and after verdict words were removed from eight test folder names.</p>
+</header>
+
+<section>
+  <h2>The problem</h2>
+  <p>Product pages, reviews and other content pages make factual claims that should match their sources but usually go unchecked, and an agent free to act near live content cannot be trusted to check them. The original answer was a bounded agent, hand-built on the Claude Agent SDK, with four read-only tools and nothing else. That system has <a href="ai-claim-verification-agent.html">its own case study</a>.</p>
+  <p>This repository asks a narrower, second question: if the same bounded agent is rebuilt on a popular agent framework instead of by hand, do its safety limits survive the move, and does the framework help or get in the way?</p>
+</section>
+
+<section>
+  <h2>What was built, and the test it was held to</h2>
+  <p>The port keeps the same four read-only tools, the same three verdicts (SUPPORTED, CONTRADICTED, UNVERIFIABLE) and the same comparison policy, and is built with LangChain v1's <span class="mono">create_agent</span>. The original enforces five limits: a fixed list of allowed tools, a cap of 20 turns, a cost ceiling per run, a counter that stops a run after too many tool calls, and an audit row written before a tool result reaches the model. In the port, the tool list given to the framework is the allowed list, and a framework component stops a run after 20 model calls. The rest is hand-written middleware, code that runs around every model and tool call. It adds up the cost of each model call. It refuses further tool calls once that cost passes the ceiling, or after the 60th tool call. And it writes an audit row to a local SQLite log before and after every tool call, refused calls included.</p>
+  <p>The test was fixed before the port existed. The 12 synthetic cases, the answer key and the file holding the pass mark and the comparison policy are copied from the original: at the port's first code commit they are byte for byte the original's files. The original's runner cannot drive the framework, so the port has its own, which scores with the same matching rule and metric definitions. The pass mark, the gate, is the original's: precision at least 0.95 and recall at least 0.90, with CONTRADICTED as the positive class, over 8 truly contradicted claims among 35. Three cases are traps: a near-match number, a price spelled out in words, and a forum post repeating a figure against the manufacturer's spec sheet.</p>
+  <p>The first decision record was committed on 2026-07-18 (<a class="mono" href="https://github.com/kobescak-kristian/ai-claim-verification-langgraph/commit/f25a66d">f25a66d</a>), and the first agent code on 2026-07-20 (<a class="mono" href="https://github.com/kobescak-kristian/ai-claim-verification-langgraph/commit/4550db7">4550db7</a>). That record fixed the rules: the existing scorer and thresholds decide PASS or FAIL, the result is published either way, and any move from fail to pass must be the port improving, never the ruler moving. It also registered a prediction: the tool list and turn cap could live in the framework, while the cost ceiling, the call counter and the audit would have to be hand-built, "because the framework offers no primitive for them."</p>
+</section>
+
+<section>
+  <h2>The run</h2>
+  <p>The official parity run, <span class="mono">p3-official-2026-07-20</span>, ran on 2026-07-20 with Claude Sonnet 4.6, the model of the original's gate run, one fresh agent invocation per case, with LangSmith tracing on. All 35 verdicts matched the answer key. No case hit the turn cap or the cost ceiling. Each case used 4 or 5 of its 20 model calls, and the run cost $0.6332 in total, $0.0442 to $0.0609 per case, against a ceiling of $1.50 per case.</p>
+  <div class="figures">
+    <div><div class="n display">8 / 8</div><div class="l">Precision 1.00, gate 0.95</div></div>
+    <div><div class="n display">8 / 8</div><div class="l">Recall 1.00, gate 0.90</div></div>
+    <div><div class="n display">35 / 35</div><div class="l">Verdicts correct, not gated</div></div>
+    <div><div class="n display">$0.6332</div><div class="l">Run cost, 12 cases</div></div>
+  </div>
+  <p class="prov">Source: evals/parity_run_2026-07-20.md and evals/traces/p3_official_2026-07-20/ · Sonnet 4.6 · 2026-07-20 · synthetic data: the original's 12 hand-written local HTML cases with a fixed answer key, not live web pages</p>
+  <p style="margin-top:18px">The cost is the port's own accounting. The port calls the model through an API key billed per token, and the middleware multiplies each call's input and output tokens by the list prices in its configuration. It is not an invoice, and it is not measured the way the original's cost is.</p>
+</section>
+
+<section>
+  <h2>What the record shows was wrong</h2>
+  <p>The prediction placed two of the five limits wrongly, and the record publishes both. Of the three limits it said would need hand-building, only the cost ceiling did: the framework has no limit in money. It does have a tool-call limit (<span class="mono">ToolCallLimitMiddleware</span>) and a hook around every tool call (<span class="mono">wrap_tool_call</span>). The audit moved onto that hook. The hand-built call counter was kept anyway, as registered, and the second decision record states that the framework offers one.</p>
+  <table>
+    <thead><tr><th>Limit</th><th>Predicted 2026-07-18</th><th>Where it ended up</th><th>Prediction</th></tr></thead>
+    <tbody>
+      <tr><td>Allowed tool list</td><td>in the framework</td><td>in the framework</td><td class="ok">held</td></tr>
+      <tr><td>Turn cap, 20, fails closed</td><td>in the framework</td><td>in the framework (<span class="mono">ModelCallLimitMiddleware</span>)</td><td class="ok">held</td></tr>
+      <tr><td>Cost ceiling in dollars</td><td>hand-built</td><td>hand-built middleware</td><td class="ok">held</td></tr>
+      <tr><td>Tool-call counter</td><td>hand-built</td><td>hand-built, kept as registered</td><td class="err">wrong: a framework limit exists</td></tr>
+      <tr><td>Audit before use</td><td>hand-built</td><td>framework hook (<span class="mono">wrap_tool_call</span>)</td><td class="err">wrong: the hook exists and was adopted</td></tr>
+    </tbody>
+  </table>
+  <p style="margin-top:18px">The written plan also had a fact wrong about the original. It called audit rows written inside the tools the original's proven pattern. Checked against the original on 2026-07-20, the original's tools contain no audit code; its audit rows come from SDK hooks around the tools. The second decision record carries this as a dated correction and leaves the plan's text as committed.</p>
+  <p>The port also inherited the original's test folder names. Until 2026-10-13, 8 of the 12 case folder names contained a verdict word (supported, contradicted or unverifiable). The folder name reached the model in the user prompt, and the <span class="mono">fetch_page</span> tool description carried one old name, <span class="mono">case_01_supported_wireless_earbuds</span>, as its example path. On 2026-10-13 the folders were renamed <span class="mono">case_01</span> to <span class="mono">case_12</span> (<a class="mono" href="https://github.com/kobescak-kristian/ai-claim-verification-langgraph/commit/0014334">0014334</a>), the answer key changed by name substitution only, and the test suite gained a check that fails if any dataset name contains a verdict word. Then the frozen eval was run again: same dataset content, scorer, thresholds, model, ceiling and caps, one fresh invocation per case, no case re-run. Between the two runs the agent code changed only in that example path and in a 2026-07-24 fix that rejects backslash paths.</p>
+  <div class="callout">
+    <span class="st mono">RE-RUN ON NEUTRAL NAMES · 2026-10-13</span>
+    <blockquote>Precision 1.00 (8/8), recall 1.00 (8/8), 35 of 35 verdicts correct, no case capped. Gate PASS. $0.6139 in total, 4 or 5 model calls per case.</blockquote>
+    <p class="src">&rarr; evals/rerun_2026-10-13.md and evals/results/official-rerun-2026-10-13.json, recorded beside the July record, never replacing it. Synthetic data: the same 12 hand-written cases.</p>
+  </div>
+  <p style="margin-top:22px">The original agent's own re-run on the neutral names also scored 35 of 35, so the parity holds without the hint.</p>
+</section>
+
+<section>
+  <h2>What this proves, and what it does not</h2>
+  <p>It proves that on 12 hand-written cases the port passes the same frozen gate as the original, with every verdict correct, and still does when the folder names no longer carry verdict words. And it counted the code: the agent files hold 509 lines in the original and 585 in the port, counted as plain file lines with comments and blank lines included. The tools and audit files shrank by 69 lines together; the new middleware file adds 129.</p>
+  <p>Three of the five limits are tested in CI. A 22-test suite, which <a class="mono" href="https://github.com/kobescak-kristian/ai-claim-verification-langgraph/blob/f969a98/.github/workflows/ci.yml">CI</a> runs on Ubuntu, macOS and Windows with Python 3.12 and 3.14 on every push and pull request to main, calls the tools through the real middleware. It checks that the call counter trips after 60 calls, that tool calls are refused once the tracked cost passes the ceiling (the test sets that cost by hand; the cost adding-up itself is not tested), and that the audit row comes before the result row, on one normal and one refused call. It also checks that paths outside the dataset folder are rejected and that no dataset name carries a verdict word. A check that the answer key's claim IDs never appear in the audit log runs too, but in CI the log holds only the suite's own test calls. One test, which needs the audit log of a real run, is skipped in CI because no such log is committed (<a class="mono" href="https://github.com/kobescak-kristian/ai-claim-verification-langgraph/actions/runs/38324888365">run at f969a98</a>: 21 passed, 1 skipped on all six jobs). The turn cap and the tool list are set in code and not tested.</p>
+  <p>It does not prove the agent works on real web pages, and it is not a tight estimate: both runs caught all 8 contradicted claims, but with only 8, one miss would have meant 7 of 8 (0.875), below the 0.90 gate.</p>
+  <div class="limits">
+    <h3 class="mono">KNOWN LIMITATIONS, SELF-DECLARED</h3>
+    <ul>
+      <li>The eval runs on labeled synthetic pages by design; the system has not been deployed and carries no production or availability claim.</li>
+      <li>Parity was measured on one task family, one dataset and one model pair: evidence that the port kept the system's behaviour under its gate, not a general claim about either framework.</li>
+      <li>The trace archive of the July run is a record exported and committed by the repository author, not independently hosted evidence; the hosted LangSmith traces were due to expire about 14 days after the run.</li>
+      <li>Tracing was off for the October re-run, so it has no trace archive; its evidence is the committed runner output.</li>
+      <li>A development sweep on Claude Haiku 4.5 got all 12 cases right; its record calls that weak evidence for the official run.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>The decision on record</h2>
+  <div class="adr">
+    <span class="t mono">DECISION 0001: PORT TARGET, CAGE TRANSLATION STRATEGY, EVAL-PARITY CONTRACT · DATED 2026-07-18 · ACCEPTED</span>
+    <p>The claim-verification agent was chosen as the port target over the compliance orchestrator for three reasons: it is a single agent, which fits a two-week part-time box; its frozen eval was already green, so parity asks a question that can fail; and its bounds suite is a ready-made checklist for translating the limits. It pre-registers the predictions "so the writeup's conclusions cannot be retro-fitted to whatever the port happened to do." The second decision record, dated 2026-07-20, scores them against the framework's live documentation: of the three limits said to have no framework tool, one held and two were wrong, all published, because "the writeup's evidence base is the tested record, not the prediction."</p>
+  </div>
+  <p style="margin-top:18px">The comparison writeup is the deliverable of this port: what the framework gives, what it hides, and what it cannot enforce, limit by limit. Its conclusion is that the framework moved enforcement into an explicit middleware layer and did not remove the need to prove it, and that the test suite, not the framework, is what makes the limits trustworthy; in this port that suite covers three of the five.</p>
+  <p>Claude coding agents are named as co-authors on 23 of the 33 non-merge commits, including the first agent code, the parity run, the comparison writeup, the folder rename and the re-run. The plan and first decision record of 2026-07-18 and the second decision record carry no co-author line. Every commit lists Kristian Kobescak as Git author, and the non-merge commits since 2026-10-06 carry a coding-agent Git identity as committer. All five pull requests were merged from the owner's account. GitHub records no review on any of them; two commits are titled as review fixes, but the repository does not name the reviewer, or record who made the decisions or ran the runs.</p>
+  <div class="cta">
+    <a class="btn pri" href="https://github.com/kobescak-kristian/ai-claim-verification-langgraph/blob/f969a98/COMPARISON.md">Read the comparison writeup &rarr;</a>
+    <a class="btn sec" href="https://github.com/kobescak-kristian/ai-claim-verification-langgraph/blob/f969a98/evals/parity_run_2026-07-20.md">The July parity run</a>
+    <a class="btn sec" href="https://github.com/kobescak-kristian/ai-claim-verification-langgraph/blob/f969a98/evals/rerun_2026-10-13.md">The October re-run</a>
+    <a class="btn sec" href="../index.html#engines">All the systems</a>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div class="wrap">KRISTIAN KOBESCAK · CASE STUDY · SOURCES: evals/parity_run_2026-07-20.md · evals/rerun_2026-10-13.md · COMPARISON.md · RUNS p3-official-2026-07-20 AND official-rerun-2026-10-13 · README, DECISION RECORDS, TESTS AND COMMIT HISTORY IN THE PUBLIC REPO</div>
+</footer>
+
+</body>
+</html>
