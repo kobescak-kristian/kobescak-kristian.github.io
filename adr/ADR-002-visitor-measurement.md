@@ -37,7 +37,7 @@ Facts:
 - The EDPB's Guidelines 2/2023 on the technical scope of Article 5(3)
   (version 2.0, adopted 7 October 2024) say the rule is not limited to
   cookies. A JavaScript snippet that makes the browser send information
-  back is in scope (paragraph 32), and so is a tracking pixel
+  back is in scope (paragraphs 32 and 33), and so is a tracking pixel
   (paragraph 51). Paragraph 56 adds that being in scope does not always
   mean consent is needed; an exemption may apply case by case.
 - Analytics is not on the list of exemptions in the current law. The
@@ -48,9 +48,10 @@ Facts:
   consent-free exemption for aggregated audience measurement. As of
   October 2026 it is still a proposal, its wording is still changing,
   and it is not law.
-- Cookieless tools (GoatCounter, Plausible) state that their sites
-  need no consent banner. That is the vendors' reading, not a
-  regulator's ruling.
+- Plausible states that its customers do not need cookie banners.
+  GoatCounter states only that it "probably" needs no GDPR consent
+  notice, and says nothing about the ePrivacy rule. Both are the
+  vendors' readings, not a regulator's ruling.
 
 Inference: a cookieless, aggregate-only counter on a personal site is
 low-risk in practice, and many EU sites run one without a banner. It is
@@ -74,7 +75,7 @@ blocker or browser blocks GoatCounter are not counted.
 | Option | What it measures | Consent banner | Cost | Fit with ADR-001 |
 |---|---|---|---|---|
 | A. No page code: Search Console only | Google search clicks only | Not needed | Free | Unchanged |
-| B. GoatCounter, no banner (recommended) | Visits, pages, referrers, country, device type | Not used; residual legal risk accepted | Free for reasonable use | One script tag per page |
+| B. GoatCounter, no banner (chosen) | Visits, pages, referrers, country, device type | Not used; residual legal risk accepted | Free for reasonable use | One script tag per page |
 | C. GoatCounter behind an opt-in prompt | Same as B, for visitors who accept | Yes, before the script loads | Free | Script plus prompt code per page |
 | D. Plausible, no banner | Same as B, plus engagement | Not used; same residual risk as B | From 9 USD a month after a 30-day trial | One script tag per page |
 | E. Cloudflare Web Analytics | Visits, pages, referrers, performance | Not used; same residual risk as B | Free | One script tag per page |
@@ -93,9 +94,10 @@ blocker or browser blocks GoatCounter are not counted.
 - **D. Plausible.** Comparable privacy design (daily-rotated hash, no
   cookies, EU-hosted), but it costs money and adds an account to pay
   for. Its extra features are not needed for a portfolio site.
-- **E. Cloudflare Web Analytics.** Free, but a US company; its own
-  documentation of the beacon is mainly about page performance, and
-  the documentation checked does not say how visits are counted.
+- **E. Cloudflare Web Analytics.** Free, but a US company, and its
+  documentation of the beacon is mainly about page performance. It
+  offers nothing for this site that GoatCounter does not, at no
+  lower risk.
 - **F. Google Analytics 4.** Sets cookies, so it needs a consent tool,
   and it sends data to a US advertising company. Out of proportion for
   a personal site.
@@ -103,8 +105,6 @@ blocker or browser blocks GoatCounter are not counted.
   ADR-001 rules out.
 
 ## Consequences
-
-If option B is accepted:
 
 - One GoatCounter script tag is added to `index.html` and to each page
   in `case-studies/`. The site gains its first third-party request.
@@ -119,16 +119,19 @@ If option B is accepted:
   service, and GDPR Article 13 lists more items (purpose, legal basis,
   retention, rights) than the line states.
 - The residual legal risk in Context is accepted by the owner, in
-  writing, when this record becomes Accepted.
+  writing, by this record.
+- The GoatCounter setting "collect individual pageviews" stays off
+  (the default). With it on, GoatCounter stores a random session ID per
+  visit, and the footer claim "no visitor profiles" would need review.
 - Public text must change in the same pull request: `README.md`
   ("no tracking"), `AGENTS.md` (repository purpose and always-on
   constraints) and the status line of ADR-001, which gets a pointer
   saying its "no analytics" clause is replaced by this record. ADR-001's
   decision text is not edited.
-- Per-application links (for example `?ref=<company>` added to the
-  homepage URL in a CV) appear as a source in the GoatCounter campaigns
-  view. This shows that a link given to one organisation was opened,
-  not who opened it.
+- Per-application links (for example `?campaign=<company>` added to
+  the homepage URL in a CV) appear in the GoatCounter campaigns view.
+  This shows that a link given to one organisation was opened, not who
+  opened it.
 - The service is run by one person and offered free. If it stops, the
   site loses counting but nothing else breaks.
 
