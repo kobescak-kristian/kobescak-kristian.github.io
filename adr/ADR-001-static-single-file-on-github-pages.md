@@ -1,6 +1,7 @@
 # ADR-001 — Single static file hosted on GitHub Pages
 
-**Status:** Accepted — 2026-07-07
+**Status:** Accepted — 2026-07-07. The "no analytics" clause is replaced
+by ADR-002 (visitor measurement); the rest of this decision stands.
 
 ## Context
 

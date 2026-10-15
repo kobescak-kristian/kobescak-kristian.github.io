@@ -14,8 +14,10 @@ selected case studies, operating background and positioning, and links to
 the public evidence behind each claim.
 
 The site is intentionally static: no application framework, no package
-manager or build step, no dependency layer, no server-side component, and
-no analytics or tracking. Deployment is the committed static files served
+manager or build step, no dependency layer, and no server-side component.
+The one third-party script is the cookieless GoatCounter visit counter
+decided in `adr/ADR-002-visitor-measurement.md`; there is no other
+analytics or tracking. Deployment is the committed static files served
 by GitHub Pages. Human overview: `README.md`.
 
 Metrics, engine scores, record and failure counts, pinned commit hashes,
@@ -63,6 +65,7 @@ These are starting points, not exhaustive reading lists.
 | Homepage content, public claims, search and social metadata, layout, styling, client-side interaction | `index.html` |
 | Case-study content | `case-studies/*.html` |
 | Static-site architecture or deployment decision | `adr/ADR-001-static-single-file-on-github-pages.md` |
+| Visitor measurement | `adr/ADR-002-visitor-measurement.md` |
 | Evidence behind a repository claim | the linked or pinned public source repository, read together with the site HTML that makes the claim |
 | Publication exception for an otherwise-blocked line | `.publicgate-allow` |
 | Machine-local path guard | `.githooks/pre-commit` |
@@ -74,8 +77,10 @@ These are starting points, not exhaustive reading lists.
 
 - The static architecture is deliberate. Do not introduce a framework,
   build pipeline, package manager, dependency layer, server-side
-  component, analytics or tracking as unrelated work. A material
-  architecture change requires an authorized decision recorded in `adr/`.
+  component, analytics or tracking as unrelated work. The visit counter
+  allowed by ADR-002 is the only analytics. A material architecture
+  change, including any analytics beyond that counter, requires an
+  authorized decision recorded in `adr/`.
 - Repository and technical claims displayed on the site must trace to
   committed, publicly inspectable evidence. Do not invent, approximate,
   round upward or otherwise improve a number because it reads better.

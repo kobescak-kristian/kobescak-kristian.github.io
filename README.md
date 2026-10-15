@@ -8,8 +8,10 @@ business workflows into controlled AI-assisted systems.
 ## What this is
 
 A static site: `index.html` plus one static page per case study. No
-framework, no build step, no dependencies, no tracking. The homepage runs
-systems → reference architecture → method → experience, and presents the
+framework, no build step, no dependencies. Visits are counted with
+GoatCounter, with no cookies and no visitor profiles (`adr/ADR-002-visitor-measurement.md`).
+The homepage runs systems → reference architecture → method →
+experience, and presents the
 public repositories as independent systems that share a way of working
 rather than a shared runtime.
 
