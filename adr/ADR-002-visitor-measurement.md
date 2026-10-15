@@ -1,9 +1,9 @@
 # ADR-002 - Visitor measurement on the site
 
-**Status:** Proposed (2026-10-16). The owner chose option B on
+**Status:** Accepted (2026-10-16). The owner chose option B on
 2026-10-16 and accepts the residual legal risk described in Context.
-The record becomes Accepted once the checks under Verification pass on
-the live site.
+The repository checks under Verification passed at acceptance; the
+live checks run after deployment and are recorded in `STATE.md`.
 
 **Date:** 2026-10-16
 **Author:** Kristian Kobescak (drafted with Claude Code)
@@ -132,14 +132,22 @@ If option B is accepted:
 - The service is run by one person and offered free. If it stops, the
   site loses counting but nothing else breaks.
 
-## Verification (before Accepted)
+## Verification
 
-- The script tag is present on every public page:
-  `grep -c "gc.zgo.at/count.js" index.html case-studies/*.html` shows 1 per file.
-- A live visit shows in the GoatCounter dashboard within minutes.
-- Browser developer tools on the live site show no cookie and no
-  localStorage or sessionStorage entry set by the counter.
-- The footer note is present on every public page.
+At acceptance (repository, 2026-10-16), both commands return 1 for
+each of the 9 public pages (`index.html` and the 8 files in
+`case-studies/`):
+
+- `grep -c "gc.zgo.at/count.js" index.html case-studies/*.html`
+  (the counter script);
+- `grep -c "THIS SITE COUNTS VISITS WITH" index.html case-studies/*.html`
+  (the footer note).
+
+After deployment (live site, recorded in `STATE.md`):
+
+- a visit shows in the GoatCounter dashboard;
+- browser developer tools show no cookie and no localStorage or
+  sessionStorage entry set by the counter.
 
 ## Review
 
