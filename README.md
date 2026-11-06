@@ -39,8 +39,8 @@ public and its link verified.
 
 Featured, in the order the homepage presents them:
 
-- [ai-portfolio-sentinel](https://github.com/kobescak-kristian/ai-portfolio-sentinel) — portfolio flagship; status: in development toward production-ready
-- [ai-compliance-orchestrator](https://github.com/kobescak-kristian/ai-compliance-orchestrator) — advanced system
+- [ai-compliance-orchestrator](https://github.com/kobescak-kristian/ai-compliance-orchestrator) — portfolio flagship
+- [ai-portfolio-sentinel](https://github.com/kobescak-kristian/ai-portfolio-sentinel) — advanced system; status: in development toward production-ready
 - [ai-claim-verification-agent](https://github.com/kobescak-kristian/ai-claim-verification-agent) — advanced system
 - [ai-context-engine](https://github.com/kobescak-kristian/ai-context-engine) — business-workflow capability
 - [ai-execution-engine](https://github.com/kobescak-kristian/ai-execution-engine) — business-workflow capability
@@ -51,3 +51,10 @@ architecture rather than as an integrated runtime:
 
 - [ai-reliability-engine](https://github.com/kobescak-kristian/ai-reliability-engine)
 - [ai-decision-engine](https://github.com/kobescak-kristian/ai-decision-engine)
+
+n8n workflow automations:
+
+- [n8n-ai-lead-qualifier](https://github.com/kobescak-kristian/n8n-ai-lead-qualifier)
+- [n8n-ai-output-guard](https://github.com/kobescak-kristian/n8n-ai-output-guard)
+- [n8n-ai-support-bot](https://github.com/kobescak-kristian/n8n-ai-support-bot)
+- [n8n-data-sync](https://github.com/kobescak-kristian/n8n-data-sync)

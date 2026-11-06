@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Case study: AI Context Engine — Kristian Kobescak</title>
-<meta name="description" content="The eval gate was committed before the run. The run scored 58/75 against a ≥69 gate — published as FAIL, miss pattern analyzed, thresholds never touched.">
-<meta property="og:title" content="Case study: AI Context Engine — the run that failed its own gate">
-<meta property="og:description" content="A pre-committed eval gate, a keyed run at 58/75 against ≥69 — published as FAIL and analyzed in the open, not re-tuned until the number looked right.">
+<meta name="description" content="Retrieval-grounded decision support that cites the retrieved documents behind each keyed decision. The eval gate was committed before the run: 58/75 against a ≥69 gate, with the miss pattern analyzed.">
+<meta property="og:title" content="Case study: AI Context Engine, retrieval-grounded decisions that cite their sources">
+<meta property="og:description" content="Every keyed decision cites the retrieved documents it reasoned from. A gate committed before the run: 58/75 against ≥69, with the miss pattern analyzed.">
 <meta property="og:type" content="article">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -107,12 +107,12 @@
 
 <header class="case">
   <span class="kicker mono">CASE STUDY · EVAL GATE · AI CONTEXT ENGINE</span>
-  <h1 class="display">The run that failed its own gate.</h1>
+  <h1 class="display">Retrieval-grounded decisions that cite their sources.</h1>
   <div class="meta mono">
     <span>keyed eval run · 2026-07-07 · 75 records</span>
     <span>gate locked 2026-07-06 — before the run</span>
     <span>repo verified @ 8ad6e07</span>
-    <span class="fail">RESULT: FAIL — PUBLISHED AS-IS</span>
+    <span>KEYED RUN: 58/75 AGAINST A ≥69 GATE</span>
   </div>
 </header>
 
@@ -157,7 +157,7 @@
     <div><div class="n display">17</div><div class="l">Keyed misses, analyzed</div></div>
     <div><div class="n display">0</div><div class="l">Thresholds changed after the result</div></div>
   </div>
-  <p class="prov">Source: EVAL_RESULTS.md · all 75 keyed rows used the LLM layer as intended (context_was_used=1, used_fallback=0) — a genuine model-quality result, not fallback contamination</p>
+  <p class="prov">Source: EVAL_RESULTS.md · all 75 keyed rows used the LLM layer as intended (context_was_used=1, used_fallback=0) — not fallback contamination. A 2026-10-29 review traced 12 of the 17 keyed misses to a prompt that did not define four of the five permitted actions, since fixed; no keyed run has been made since.</p>
 </section>
 
 <section>

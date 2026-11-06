@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Case study: AI Impact Scoring Engine — Kristian Kobescak</title>
-<meta name="description" content="A financial-measurement engine whose aggregate did not reconcile with its own per-lead ledger. €3,130 double-counted penalty found in audit, fixed in public history, reconciled exactly.">
-<meta property="og:title" content="Case study: AI Impact Scoring Engine — the engine that didn't reconcile with its own ledger">
-<meta property="og:description" content="An audit summed the per-lead endpoint and got €119,240; the headline said €116,110. The delta was one penalty counted twice — found, fixed in public commits, reconciled exactly.">
+<meta name="description" content="A rule-based engine that prices AI routing decisions in euros. An audit found a €3,130 double-counted penalty; it was fixed in public history, and the aggregate now reconciles exactly with the per-lead ledger.">
+<meta property="og:title" content="Case study: AI Impact Scoring Engine, routing decisions priced in euros">
+<meta property="og:description" content="Net impact of €119,240 reconciles exactly with the per-lead endpoint, after a double-counted penalty was found in audit and fixed in public commits.">
 <meta property="og:type" content="article">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -107,12 +107,12 @@
 
 <header class="case">
   <span class="kicker mono">CASE STUDY · RECONCILIATION · AI IMPACT SCORING ENGINE</span>
-  <h1 class="display">The financial engine that didn&rsquo;t reconcile with its own ledger.</h1>
+  <h1 class="display">Routing decisions priced in euros, reconciled exactly with the per-lead ledger.</h1>
   <div class="meta mono">
     <span>independent audit · 2026-07-05 · 75 synthetic leads</span>
     <span>fixes verified public 2026-07-06</span>
     <span>audited @ 98f9df6 · current @ b127fc4</span>
-    <span class="pass">RESULT: €3,130 DISCREPANCY — FOUND, FIXED, RECONCILED</span>
+    <span class="pass">RESULT: AGGREGATE RECONCILED EXACTLY WITH THE PER-LEAD LEDGER</span>
   </div>
 </header>
 
@@ -124,7 +124,7 @@
 
 <section>
   <h2>What the audit could not break</h2>
-  <p>Every numeric claim in the README reproduced exactly on a live run — 75 leads, all revenue figures, all three rates, both worked examples verbatim (audit claim-verification table: 25 claims, the README Outcome section verified line by line; full report is an internal record). The quickstart ran exit-0 with no encoding workarounds. The git history matched the version log. The layer separation held: the aggregation module imports no LLM client, and the AI layer&rsquo;s function signature accepts final metrics only — it cannot see raw lead data.</p>
+  <p>Every numeric claim in the README reproduced exactly on a live run — 75 leads, all revenue figures, all three rates, both worked examples verbatim (audit claim-verification table: 25 claims, the README Outcome section verified line by line). The quickstart ran exit-0 with no encoding workarounds. The git history matched the version log. The layer separation held: the aggregation module imports no LLM client, and the AI layer&rsquo;s function signature accepts final metrics only — it cannot see raw lead data.</p>
 </section>
 
 <section>
@@ -136,14 +136,14 @@
     <div><span class="n bad">€3,130</span><div class="l">Penalty counted twice</div></div>
     <div><span class="n bad">20%</span><div class="l">Effective penalty vs 10% stated</div></div>
   </div>
-  <p class="prov">Pre-fix figures from the 2026-07-05 audit run (internal record); the pre-fix README net of €116,110 is in the repo&rsquo;s public git history.</p>
+  <p class="prov">Pre-fix figures from the 2026-07-05 audit run; the pre-fix README net of €116,110 is in the repo&rsquo;s public git history.</p>
   <p>Summing <span class="mono">GET /impact/{lead_id}</span> over all 75 leads gave <strong>€119,240</strong>. <span class="mono">GET /impact</span> reported net impact <strong>€116,110</strong>. The €3,130 difference was the delayed-conversion penalty, counted twice — once inside per-lead revenue (entered net of penalty) and again as an itemized loss. Each delayed lead effectively carried a 20% penalty while the config and the README both said 10%. A reviewer who cross-sums the per-lead endpoint catches it in minutes; the AI layer narrated the inconsistent numbers with confidence.</p>
   <p>Two more findings compounded it for the same skeptical reader: a valid input combination the README explicitly permits — <span class="mono">archived</span> + <span class="mono">converted_delayed</span> — fell out of the routing table and silently returned <span class="mono">unknown</span> with €0 impact, while the ADR asserted every valid pair was mapped (14 of 15 were); and the aggregate layer hardcoded penalty constants instead of reading the config multipliers the documentation pointed at, so tuning the config moved per-lead figures but not the headline.</p>
 </section>
 
 <section>
   <h2>The fixes, in public history</h2>
-  <p>Two remediation commits, both in the open history and dated in the README version log. The accounting decision (gross-revenue entry, penalty counted once) was made by the owner; the fixes were implemented in-session and re-verified from a fresh public clone on 2026-07-06 before the record closed (internal record; the fix trail itself is public).</p>
+  <p>Two remediation commits, both in the open history and dated in the README version log. The accounting decision (gross-revenue entry, penalty counted once) was made by Kristian; the fixes were implemented in-session and re-verified from a fresh public clone on 2026-07-06 before the record closed (the fix trail is public).</p>
   <table>
     <thead><tr><th>Commit</th><th>What it fixed</th></tr></thead>
     <tbody>
@@ -168,7 +168,7 @@
     <blockquote>&ldquo;Audit fix (M1+M3, Option A): aggregate layer double-counted the delay penalty&rdquo;</blockquote>
     <p class="src">README.md version log, 2026-07-06 — public, in the repo, with the mechanism, the accounting decision taken, and what changed versus what didn&rsquo;t.</p>
   </div>
-  <p style="margin-top:18px">The history of being wrong is kept, not rewritten.</p>
+  <p style="margin-top:18px">The earlier figures stay in the public history.</p>
 </section>
 
 <section>
@@ -183,7 +183,6 @@
       <li>There is no coverage gate, so low-outcome-coverage runs look as confident as full ones.</li>
     </ul>
   </div>
-  <p style="margin-top:16px">Of seven minor audit findings, one was fixed in remediation; six were carried forward, documented rather than silently fixed (internal record).</p>
 </section>
 
 <section>

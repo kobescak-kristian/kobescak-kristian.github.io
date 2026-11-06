@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Case study: AI Decision Engine · Kristian Kobescak</title>
-<meta name="description" content="A lead-routing pipeline that scores its own decisions against later outcomes. Its fix commits record that a stored decision could be overwritten, one lead's outcome could be counted twice, and a failed validation was discarded before it was stored; a CI check now re-runs the demo on six configurations.">
-<meta property="og:title" content="Case study: AI Decision Engine, a system built to judge its decisions that could overwrite them">
-<meta property="og:description" content="Five defects found in an audit and a later re-verification, each shown beside the README or decision-record line it sat next to, fixed on 2026-07-05 and 2026-07-06; the decision record was clarified, not rewritten.">
+<meta name="description" content="A lead-routing pipeline that records each AI-assisted decision and scores it against later outcomes. A CI check re-runs the demo on six configurations.">
+<meta property="og:title" content="Case study: AI Decision Engine, a lead pipeline that scores the quality of its own decisions">
+<meta property="og:description" content="A lead-routing pipeline that records each decision, joins the outcome later and scores it, hardened in July 2026, with a CI check on six configurations.">
 <meta property="og:type" content="article">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -109,15 +109,15 @@
 
 
 <header class="case">
-  <span class="kicker mono">CASE STUDY · AUDIT REMEDIATION · AI DECISION ENGINE</span>
-  <h1 class="display">Built to judge whether its decisions were right, it could quietly overwrite them.</h1>
+  <span class="kicker mono">CASE STUDY · DECISION QUALITY · AI DECISION ENGINE</span>
+  <h1 class="display">A lead pipeline that scores the quality of its own decisions.</h1>
   <div class="meta mono">
-    <span>remediation · 2026-07-05 to 2026-07-06</span>
+    <span>hardening · 2026-07-05 to 2026-07-06</span>
     <span>CI run 37558629364 · 2026-10-07</span>
     <span>repo verified @ 70b09bf</span>
     <span class="pass">RESULT: 6 OF 6 CI JOBS GREEN · NO EVAL GATE</span>
   </div>
-  <p style="margin-top:22px">A lead-routing pipeline for sales teams that records each AI-assisted routing decision and later scores it against the recorded outcome; its fix commits record that a stored decision could be overwritten, one lead's outcome could be counted twice and a failed validation was discarded before it was stored, and after the fixes the demo passes a CI check on six configurations, on synthetic data.</p>
+  <p style="margin-top:22px">A lead-routing pipeline for sales teams that records each AI-assisted routing decision and later scores it against the recorded outcome. After the hardening shown below, the demo passes a CI check on six configurations, on synthetic data.</p>
 </header>
 
 <section>
