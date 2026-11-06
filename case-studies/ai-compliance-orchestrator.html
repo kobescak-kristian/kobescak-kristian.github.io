@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Case study: AI Compliance Orchestrator · Kristian Kobescak</title>
-<meta name="description" content="Bounded agents over a deterministic control plane. On the official run every orchestration invariant passed and violation detection failed its precision gate, 0.844 against 0.95, published as FAIL.">
-<meta property="og:title" content="Case study: AI Compliance Orchestrator, the plumbing held and the detector failed">
-<meta property="og:description" content="A gate committed before the run, an official run on 12 synthetic pages: orchestration invariants PASS, detection precision 0.844 against 0.95, FAIL published with its miss patterns.">
+<meta name="description" content="Bounded agents over a deterministic control plane, checking iGaming content against three synthetic rule sets. Latest official evaluation: gate v2.1 PASS, 29 of 30 synthetic scenarios in all 3 runs.">
+<meta property="og:title" content="Case study: AI Compliance Orchestrator, bounded agents across three jurisdictions">
+<meta property="og:description" content="Latest official evaluation: gate v2.1 PASS on a private synthetic test set, 29 of 30 scenarios in all 3 runs and 52 of 52 deterministic checks.">
 <meta property="og:type" content="article">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -108,26 +108,49 @@
 
 <header class="case">
   <span class="kicker mono">CASE STUDY · ORCHESTRATION · AI COMPLIANCE ORCHESTRATOR</span>
-  <h1 class="display">The plumbing held. The detector failed its own gate.</h1>
+  <h1 class="display">Three jurisdictions, bounded agents, and a gate passed on 29 of 30 scenarios.</h1>
   <div class="meta mono">
-    <span>official gate run · 2026-07-09 · gate-9328e564</span>
-    <span>gate committed 2026-07-07, before the run</span>
-    <span>repo verified @ 62f5935</span>
-    <span class="fail">RESULT: FAIL, PUBLISHED AS IS</span>
+    <span>latest official series · 2026-11-05 · H2-2026-11-05-a7871a</span>
+    <span class="pass">RESULT: PASS, 29 OF 30</span>
+    <span>first official run · 2026-07-09 · gate-9328e564</span>
+    <span>repo verified @ ef46410</span>
   </div>
-  <p style="margin-top:22px">Bounded AI agents check iGaming operator and affiliate pages against three synthetic rule sets, inside a deterministic control plane with a human approval gate; on the official run, scored on synthetic data, the orchestration leg of the gate passed and violation detection failed its precision gate, 0.844 against 0.95.</p>
+  <p style="margin-top:22px">Bounded AI agents check iGaming operator and affiliate pages against three synthetic rule sets, inside a deterministic control plane with a human approval gate. In its latest official evaluation the system passed gate v2.1 on a private test set: 29 of 30 synthetic scenarios passed in all 3 runs, and 52 of 52 deterministic checks passed. This page also covers the first official run in July, which missed its precision target, and the repair program that followed.</p>
 </header>
 
 <section>
   <h2>The problem</h2>
   <p>iGaming content, on operator and affiliate sites alike, is published under several regulatory regimes at once (MGA, UKGC and German GlüStV-style themes). Content that is compliant in one jurisdiction can break the rules of another, rules change, and manual review does not scale. A single unbounded agent "checking compliance" cannot be trusted or audited. A finding is only useful if it traces to a specific rule and a specific piece of evidence.</p>
-  <p>The rule sets here are synthetic: modelled on publicly known regulatory themes, not copied from real regulatory text, and not reviewed by counsel. The system demonstrates the orchestration pattern. It makes no claim of legal accuracy.</p>
+  <p>The rule sets here are synthetic, modelled on publicly known regulatory themes. The system demonstrates the orchestration pattern.</p>
 </section>
 
 <section>
-  <h2>What was built, and the gate committed first</h2>
+  <h2>Latest result: gate v2.1 PASS</h2>
+  <p>The official evaluation of 2026-11-05 ran on a private test set of 30 synthetic scenarios, 10 for each jurisdiction, with <span class="mono">claude-sonnet-5-5</span>. Each scenario ran 3 times. It followed a repair program that addressed ten defects, including the page reader, evidence-excerpt checks, timeouts and the prompt-injection boundary.</p>
+  <table>
+    <thead><tr><th>Measure</th><th>Result</th><th>Gate limit</th><th>Outcome</th></tr></thead>
+    <tbody>
+      <tr><td>Synthetic scenarios passed in all 3 runs</td><td>29 of 30</td><td>at most 2 may fail</td><td class="ok">PASS</td></tr>
+      <tr><td>Deterministic reliability and planner-integrity checks</td><td>52 of 52</td><td>all must pass</td><td class="ok">PASS</td></tr>
+      <tr><td>Pages with a repeated material error on another rule</td><td>0 of 30</td><td>at most 6</td><td class="ok">PASS</td></tr>
+    </tbody>
+  </table>
+  <p class="prov">Source: evals/EVAL_RESULTS.md and evals/results/H2-2026-11-05-a7871a.json, series H2-2026-11-05-a7871a at commit 91105ca · synthetic data: purpose-written pages and synthetic rule sets, not real regulation</p>
+  <p style="margin-top:18px">In the one scenario that did not pass, <span class="mono">h2-22</span> (rule <span class="mono">DEU-PC-03</span>), the violation was found and confirmed in all 3 runs; the evidence excerpt did not overlap the core span in the answer key.</p>
+  <div class="limits">
+    <h3 class="mono">SCOPE OF THIS RESULT</h3>
+    <ul>
+      <li>Pages and rule sets are synthetic. This is one series on one test set.</li>
+      <li>The gate, test set, rule text and model all changed after July, so this is not a like-for-like comparison with that run.</li>
+      <li>Test pages and keys are private by design. Sanitized results and a hash manifest are public.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <h2>What was built, and the first gate</h2>
   <p>One checker agent per jurisdiction reads a page against its own rule set only. A second agent, the already published <span class="mono">ai-claim-verification-agent</span>, reused unmodified and pinned to one commit, re-checks each violation a checker reports and returns CONFIRMED, REJECTED or DISPUTED. A planner agent drafts a fix for confirmed violations only, and a human approves or rejects each fix in a command-line tool. Everything between the agents (task state, severity ranking, schema checks, dead-letter routing) is deterministic Python. No model decides what runs next.</p>
-  <p>The pass and fail bar lives in <span class="mono">evals/eval_config.yaml</span>. Any leg that fails, fails the gate.</p>
+  <p>The July pass and fail bar is in <span class="mono">evals/eval_config.yaml</span> as of commit <span class="mono">62f5935</span>; the current file holds gate v2.1. Any leg that fails, fails the gate.</p>
   <table>
     <thead><tr><th>Gate leg</th><th>Threshold</th><th>From the committed config</th></tr></thead>
     <tbody>
@@ -148,11 +171,11 @@
       </tr>
     </tbody>
   </table>
-  <p style="margin-top:16px" class="dim">The order is public in <span class="mono">git log</span>: the thresholds were committed on 2026-07-07 (<span class="mono">e78f3c0</span>); the one later edit to that file filled in dataset paths, not a threshold. The scorer was frozen at <span class="mono">f3f04fb</span>, and the result was committed after both, at <span class="mono">b097f7a</span>.</p>
+  <p style="margin-top:16px" class="dim">The order is public in <span class="mono">git log</span>: the thresholds were committed on 2026-07-07 (<span class="mono">e78f3c0</span>); up to the July run, the one later edit to that file filled in dataset paths, not a threshold. The scorer was frozen at <span class="mono">f3f04fb</span>, and the result was committed after both, at <span class="mono">b097f7a</span>.</p>
 </section>
 
 <section>
-  <h2>The official run</h2>
+  <h2>The first official run, July 2026</h2>
   <p>The official run on 2026-07-09 used <span class="mono">claude-sonnet-4-6</span> for the checker, the adjudicator and the planner, on the full corpus: 12 pages, 23 check tasks, 288 scored cells. The data is synthetic. The 12 pages were written for the eval with planted violations, and the answer key of 30 violations was frozen before the run.</p>
   <div class="figures">
     <div><div class="n display bad">0.844</div><div class="l">Pooled precision, FAIL (gate &ge;0.95)</div></div>
@@ -174,8 +197,9 @@
 </section>
 
 <section>
-  <h2>Where it failed</h2>
-  <p>On the synthetic eval set, all 8 misses (5 false positives, 3 false negatives) came from the checker, in GBR and MLT; DEU scored clean. The adjudicator confirmed all 32 violation findings it was given and rejected none, so on this run it added no precision protection. The record says so instead of giving it credit. The misses are analysed cell by cell in the repo:</p>
+  <h2>What the first run found</h2>
+  <p><strong>Root cause, found 2026-11-02:</strong> a later review traced 6 of the 8 misses to the page reader, not the checker. The reader dropped every heading and list item, so the checker and the adjudicator never saw that text. This replaces the cause given for the wrong-paragraph, distractor and disconnected-sentence patterns below. Scores, thresholds and the July result stand as recorded.</p>
+  <p>On the synthetic eval set, all 8 misses (5 false positives, 3 false negatives) were in GBR and MLT; DEU scored clean. The adjudicator confirmed all 32 violation findings it was given and rejected none, so on this run it added no precision protection. The record says so instead of giving it credit. The misses are analysed cell by cell in the repo:</p>
   <table>
     <thead><tr><th>Pattern</th><th>Misses</th><th>What the checker did</th></tr></thead>
     <tbody>
@@ -207,20 +231,20 @@
     </tbody>
   </table>
   <div class="callout">
-    <span class="st mono">PUBLISHED, NOT RE-RUN</span>
+    <span class="st mono">JULY RECORD: PUBLISHED, NOT RE-RUN</span>
     <blockquote>Gates were not adjusted to produce this result and will not be adjusted after it.</blockquote>
     <p class="src">&rarr; evals/EVAL_RESULTS.md, gate result section, committed with the run.</p>
   </div>
 </section>
 
 <section>
-  <h2>What this run proves, and what it does not</h2>
+  <h2>What the July run proves, and what it does not</h2>
   <p>It proves the control plane held under one full official run on the synthetic eval set: 23 of 23 check tasks, 17 of 17 verify tasks and 32 of 32 plan tasks reached a terminal state, with zero lost and zero dead-lettered, and failure-injection tests FI-1 to FI-7 were green. A bounds check of the audit log found no reference to the answer-key file in any agent tool payload for the run.</p>
-  <p>It does not prove the detector is accurate enough: it failed its precision gate. It does not prove legal accuracy, because the rules are synthetic. It does not prove the adjudicator adds precision, because on this run it rejected nothing. And the idempotent re-run is shown by a unit test, not by repeating this run.</p>
+  <p>It does not prove the detector is accurate enough: it failed its precision gate. It does not prove the adjudicator adds precision, because on this run it rejected nothing. And the idempotent re-run is shown by a unit test, not by repeating this run.</p>
   <div class="limits">
     <h3 class="mono">KNOWN LIMITATIONS, SELF-DECLARED</h3>
     <ul>
-      <li>Rules are synthetic, modelled on public regulatory themes. The system demonstrates the governance pattern, not legal coverage.</li>
+      <li>Rules are synthetic, modelled on public regulatory themes. The system demonstrates the governance pattern.</li>
       <li>The answer key was split across actors (spec and key: Claude; pages: Claude Code; blind labels: ChatGPT; adjudication: Kristian), which removes key-authorship leakage. The page author still knows what it planted, and pages, key and checkers share a model family.</li>
       <li>Checker and verifier share a model. Adjudication guards against per-finding error, not model-family blind spots.</li>
       <li>Counts per jurisdiction are small (MLT 7, GBR 13, DEU 10 violations). At recall &ge; 0.90, MLT tolerates zero misses before failing; GBR and DEU tolerate one each.</li>
@@ -234,8 +258,8 @@
     <span class="t mono">ADR 0001: DETERMINISTIC CONTROL PLANE · ACCEPTED 2026-07-07</span>
     <p>The orchestrator (task ledger, state machine, schema checks, dead-letter routing, resume from the ledger, severity ranking) is deterministic Python, and no model call starts in the control plane. Agents analyse and recommend; they never decide what runs next, a payload's severity, or whether a task is done. The trade-off is recorded: the system cannot adapt its routing to what an agent says. The build proves orchestration discipline, not routing intelligence.</p>
   </div>
-  <p style="margin-top:18px">On 2026-07-09 Kristian decided to publish the FAIL as the final v1.0 result, with no re-run in that cycle. One step stays open on the record: an optional remediation pass, capped at one re-gate, and a second FAIL after it would also be published.</p>
-  <p>Built with Claude coding agents, which are named as co-authors in the commit history. Kristian adjudicated the answer key and decided to publish the FAIL.</p>
+  <p style="margin-top:18px">On 2026-07-09 Kristian decided to publish the FAIL as the final v1.0 result, with no re-run in that cycle. The optional remediation pass left open that day has since run. Its cap of one re-gate was withdrawn on 2026-11-02, and its one official series under the new gate is the November result above.</p>
+  <p>Built with Claude coding agents, which are named as co-authors in the commit history. Kristian adjudicated the July answer key and decided to publish the FAIL.</p>
   <div class="cta">
     <a class="btn pri" href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/blob/main/evals/EVAL_RESULTS.md">Read the full run record in the repo &rarr;</a>
     <a class="btn sec" href="../index.html#engines">All the systems</a>
