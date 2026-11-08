@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Case study: AI Compliance Orchestrator · Kristian Kobescak</title>
-<meta name="description" content="Bounded agents over a deterministic control plane, checking iGaming content against three synthetic rule sets. Latest official evaluation: gate v2.1 PASS, 29 of 30 synthetic scenarios in all 3 runs.">
+<meta name="description" content="Bounded agents over a deterministic control plane, checking iGaming content against three synthetic rule sets. Latest official evaluation: gate v2.1 PASS, 29 of 30 synthetic compliance scenarios in all 3 runs.">
 <meta property="og:title" content="Case study: AI Compliance Orchestrator, bounded agents across three jurisdictions">
-<meta property="og:description" content="Latest official evaluation: gate v2.1 PASS on a private synthetic test set, 29 of 30 scenarios in all 3 runs and 52 of 52 deterministic checks.">
+<meta property="og:description" content="Latest official evaluation: gate v2.1 PASS on a private synthetic test set, 29 of 30 compliance scenarios in all 3 runs and 52 of 52 deterministic checks.">
 <meta property="og:type" content="article">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%23112B24'/%3E%3Cpath d='M9 17l5 5 9-11' stroke='%23E9F5EE' stroke-width='3.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -112,45 +112,51 @@
   <div class="meta mono">
     <span>latest official series · 2026-11-05 · H2-2026-11-05-a7871a</span>
     <span class="pass">RESULT: PASS, 29 OF 30</span>
-    <span>first official run · 2026-07-09 · gate-9328e564</span>
-    <span>repo verified @ ef46410</span>
+    <span>first official run · 2026-07-09 · gate-9328e564 · gate v1.0 FAIL</span>
+    <span><a href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/tree/ef46410cf5c4c1787b5f9489085fe7a7af8d8792">repo verified @ ef46410</a></span>
   </div>
-  <p style="margin-top:22px">Bounded AI agents check iGaming operator and affiliate pages against three synthetic rule sets, inside a deterministic control plane with a human approval gate. In its latest official evaluation the system passed gate v2.1 on a private test set: 29 of 30 synthetic scenarios passed in all 3 runs, and 52 of 52 deterministic checks passed. This page also covers the first official run in July, which missed its precision target, and the repair program that followed.</p>
+  <p style="margin-top:22px">Bounded AI agents check iGaming operator and affiliate pages against three synthetic rule sets, under deterministic control and human approval, and the system passed its latest official evaluation, gate v2.1: 29 of 30 synthetic compliance scenarios in all 3 runs, 52 of 52 deterministic checks, and 0 of 30 pages with a repeated material error.</p>
+  <p>The first official run, in July, failed its gate on precision. This page covers what that failure showed and what was repaired.</p>
 </header>
 
 <section>
   <h2>The problem</h2>
-  <p>iGaming content, on operator and affiliate sites alike, is published under several regulatory regimes at once (MGA, UKGC and German GlüStV-style themes). Content that is compliant in one jurisdiction can break the rules of another, rules change, and manual review does not scale. A single unbounded agent "checking compliance" cannot be trusted or audited. A finding is only useful if it traces to a specific rule and a specific piece of evidence.</p>
-  <p>The rule sets here are synthetic, modelled on publicly known regulatory themes. The system demonstrates the orchestration pattern.</p>
+  <p>iGaming content, on operator and affiliate sites alike, can fall under several regulatory regimes at once (MGA, UKGC and German GlüStV-style themes). Content that is compliant in one jurisdiction can break the rules of another, rules change, and manual review is hard to scale. A single unbounded agent "checking compliance" is hard to trust or audit. A finding is only useful if it traces to a specific rule and a specific piece of evidence.</p>
+  <p>The rule sets here are synthetic: modelled on publicly known regulatory themes, not copied from real regulatory text, and not reviewed by counsel. The system demonstrates the orchestration pattern. It makes no claim of legal accuracy.</p>
+</section>
+
+<section>
+  <h2>What was built</h2>
+  <p>One checker agent per jurisdiction reads a page against its own rule set only. A second agent, the already published <span class="mono">ai-claim-verification-agent</span>, reused unmodified and pinned to one commit, re-checks each violation a checker reports and returns CONFIRMED, REJECTED or DISPUTED. A planner agent drafts a fix for confirmed violations only, and a human approves or rejects each fix in a command-line tool. Everything between the agents (task state, severity ranking, schema checks, dead-letter routing) is deterministic Python. No model decides what runs next.</p>
+  <p>Task states and agent tool calls are recorded in audit logs, and findings reference the applicable rule and supporting evidence.</p>
 </section>
 
 <section>
   <h2>Latest result: gate v2.1 PASS</h2>
-  <p>The official evaluation of 2026-11-05 ran on a private test set of 30 synthetic scenarios, 10 for each jurisdiction, with <span class="mono">claude-sonnet-5-5</span>. Each scenario ran 3 times. It followed a repair program that addressed ten defects, including the page reader, evidence-excerpt checks, timeouts and the prompt-injection boundary.</p>
+  <p>The official evaluation of 2026-11-05 ran on a private test set of 30 synthetic compliance scenarios, 10 for each jurisdiction, with <span class="mono">claude-sonnet-5-5</span>. Each scenario ran 3 times. The gate was set before the run: gate v2 was approved before the test set was frozen and before the repairs were committed. An amendment before the run, v2.1, changed the model and added one invalid-run condition; no threshold changed (<a href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/commits/ef46410cf5c4c1787b5f9489085fe7a7af8d8792/evals/eval_config.yaml">gate file history</a>).</p>
   <table>
     <thead><tr><th>Measure</th><th>Result</th><th>Gate limit</th><th>Outcome</th></tr></thead>
     <tbody>
-      <tr><td>Synthetic scenarios passed in all 3 runs</td><td>29 of 30</td><td>at most 2 may fail</td><td class="ok">PASS</td></tr>
+      <tr><td>Synthetic compliance scenarios passed in all 3 runs</td><td>29 of 30</td><td>at most 2 may fail</td><td class="ok">PASS</td></tr>
       <tr><td>Deterministic reliability and planner-integrity checks</td><td>52 of 52</td><td>all must pass</td><td class="ok">PASS</td></tr>
       <tr><td>Pages with a repeated material error on another rule</td><td>0 of 30</td><td>at most 6</td><td class="ok">PASS</td></tr>
     </tbody>
   </table>
-  <p class="prov">Source: evals/EVAL_RESULTS.md and evals/results/H2-2026-11-05-a7871a.json, series H2-2026-11-05-a7871a at commit 91105ca · synthetic data: purpose-written pages and synthetic rule sets, not real regulation</p>
-  <p style="margin-top:18px">In the one scenario that did not pass, <span class="mono">h2-22</span> (rule <span class="mono">DEU-PC-03</span>), the violation was found and confirmed in all 3 runs; the evidence excerpt did not overlap the core span in the answer key.</p>
+  <p class="prov">Source: <a href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/blob/ef46410cf5c4c1787b5f9489085fe7a7af8d8792/evals/EVAL_RESULTS.md">evals/EVAL_RESULTS.md</a> and <a href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/blob/ef46410cf5c4c1787b5f9489085fe7a7af8d8792/evals/results/H2-2026-11-05-a7871a.json">evals/results/H2-2026-11-05-a7871a.json</a> at ef46410. Series H2-2026-11-05-a7871a ran at commit 91105ca and was recorded at c4fa46c · synthetic data: purpose-written pages and synthetic rule sets, not real regulation</p>
+  <p style="margin-top:18px">In the one scenario that did not pass, <span class="mono">h2-22</span> (rule <span class="mono">DEU-PC-03</span>), the violation was found and confirmed in all 3 runs; the evidence excerpt did not overlap the core span in the answer key. The cause was not examined. The series took 3963.3 seconds of wall clock across the 3 runs. The Claude command-line tool reported a notional 13.9717 USD, which is not a measured charge: the series ran on a subscription login.</p>
   <div class="limits">
     <h3 class="mono">SCOPE OF THIS RESULT</h3>
     <ul>
-      <li>Pages and rule sets are synthetic. This is one series on one test set.</li>
-      <li>The gate, test set, rule text and model all changed after July, so this is not a like-for-like comparison with that run.</li>
-      <li>Test pages and keys are private by design. Sanitized results and a hash manifest are public.</li>
+      <li>Pages and rule sets are synthetic, and no legal accuracy is claimed. This is one series on one purpose-written test set.</li>
+      <li>The new gate was written with knowledge of the July failure, and the test set, rule text and model also changed. The PASS shows success against that gate. It does not show that the system would meet July's precision and recall thresholds, and it is not a controlled before-and-after comparison.</li>
+      <li>Test pages and keys are private by design, so the result cannot be recomputed from a public clone. Sanitized results and a hash manifest are public.</li>
     </ul>
   </div>
 </section>
 
 <section>
-  <h2>What was built, and the first gate</h2>
-  <p>One checker agent per jurisdiction reads a page against its own rule set only. A second agent, the already published <span class="mono">ai-claim-verification-agent</span>, reused unmodified and pinned to one commit, re-checks each violation a checker reports and returns CONFIRMED, REJECTED or DISPUTED. A planner agent drafts a fix for confirmed violations only, and a human approves or rejects each fix in a command-line tool. Everything between the agents (task state, severity ranking, schema checks, dead-letter routing) is deterministic Python. No model decides what runs next.</p>
-  <p>The July pass and fail bar is in <span class="mono">evals/eval_config.yaml</span> as of commit <span class="mono">62f5935</span>; the current file holds gate v2.1. Any leg that fails, fails the gate.</p>
+  <h2>The first gate</h2>
+  <p>The July pass and fail bar is in <span class="mono">evals/eval_config.yaml</span> as of commit <a class="mono" href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/blob/62f5935/evals/eval_config.yaml">62f5935</a>; the current file holds gate v2.1. Any leg that fails, fails the gate.</p>
   <table>
     <thead><tr><th>Gate leg</th><th>Threshold</th><th>From the committed config</th></tr></thead>
     <tbody>
@@ -192,44 +198,14 @@
       <tr><td>Pooled</td><td>27 / 5 / 3</td><td>0.844 / 0.900</td><td class="err">FAIL</td></tr>
     </tbody>
   </table>
-  <p class="prov">Source: evals/EVAL_RESULTS.md, OFFICIAL section, run gate-9328e564 · synthetic data: generated pages and synthetic rule sets, scored against the frozen answer key, not against real regulation</p>
-  <p style="margin-top:18px">Wall clock for the run was 3088 seconds (check 915, verify 1372, plan 802). Its cost and turn counts were not captured: the run script did not collect the stage counters before the process exited. The record logs this as a defect, fixed in the script for future runs, and the run was not repeated only to recover the telemetry.</p>
+  <p class="prov">Source: <a href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/blob/ef46410cf5c4c1787b5f9489085fe7a7af8d8792/evals/EVAL_RESULTS.md">evals/EVAL_RESULTS.md</a>, OFFICIAL section, run gate-9328e564 · synthetic data: generated pages and synthetic rule sets, scored against the frozen answer key, not against real regulation</p>
+  <p style="margin-top:18px">Wall clock for the run was 3088 seconds (check 915, verify 1372, plan 802). Cost and turn counts were not captured, because of a run-script defect that was logged and fixed. The run was not repeated only to recover them.</p>
 </section>
 
 <section>
   <h2>What the first run found</h2>
-  <p><strong>Root cause, found 2026-11-02:</strong> a later review traced 6 of the 8 misses to the page reader, not the checker. The reader dropped every heading and list item, so the checker and the adjudicator never saw that text. This replaces the cause given for the wrong-paragraph, distractor and disconnected-sentence patterns below. Scores, thresholds and the July result stand as recorded.</p>
-  <p>On the synthetic eval set, all 8 misses (5 false positives, 3 false negatives) were in GBR and MLT; DEU scored clean. The adjudicator confirmed all 32 violation findings it was given and rejected none, so on this run it added no precision protection. The record says so instead of giving it credit. The misses are analysed cell by cell in the repo:</p>
-  <table>
-    <thead><tr><th>Pattern</th><th>Misses</th><th>What the checker did</th></tr></thead>
-    <tbody>
-      <tr>
-        <td>Wrong-paragraph anchoring</td>
-        <td class="err">3 FP, one page</td>
-        <td>Judged a lower paragraph on its own and missed that the heading two lines above already stated the full offer terms.</td>
-      </tr>
-      <tr>
-        <td>Distractor anchoring</td>
-        <td class="err">2 FN, one page</td>
-        <td>Walked past the violating claim in the page's own heading and judged the dataset's designed decoy sentence instead, on both jurisdiction checks.</td>
-      </tr>
-      <tr>
-        <td>"Risk-free" read as "free"</td>
-        <td class="err">1 FP</td>
-        <td>Applied the free-item rule to "risk-free" wording, collapsing a rule boundary the dataset was built to test.</td>
-      </tr>
-      <tr>
-        <td>Disconnected sentences</td>
-        <td class="err">1 FN</td>
-        <td>Missed "Free Spins" paired with a deposit condition stated in another sentence. The same cell also missed on the earlier dev run, which used Haiku.</td>
-      </tr>
-      <tr>
-        <td>Over-broad urgency</td>
-        <td class="err">1 FP</td>
-        <td>Flagged a soft expiry reminder as urgency-pressure wording, which the record reads as the rule likely applied too broadly.</td>
-      </tr>
-    </tbody>
-  </table>
+  <p>All 8 misses (5 false positives, 3 false negatives) were in GBR and MLT; DEU scored clean. The July record read them as checker errors. A review on 2026-11-02 attributed 6 of the 8 to the page reader, which dropped every heading and list item, so the checker and the adjudicator never saw that text. That attribution comes from checking what the reader returned on the frozen pages, not from a model re-run. The record reads the other 2 misses as rule-interpretation errors: "risk-free" wording treated as a free-item claim, and a soft expiry reminder flagged as urgency pressure.</p>
+  <p>The adjudicator confirmed all 32 violation findings it was given, so it added no precision protection in that run, and it was reading the same truncated pages. Scores, thresholds and the FAIL stand as recorded. The <a href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/blob/ef46410cf5c4c1787b5f9489085fe7a7af8d8792/evals/EVAL_RESULTS.md">run record</a> analyses each miss.</p>
   <div class="callout">
     <span class="st mono">JULY RECORD: PUBLISHED, NOT RE-RUN</span>
     <blockquote>Gates were not adjusted to produce this result and will not be adjusted after it.</blockquote>
@@ -238,16 +214,24 @@
 </section>
 
 <section>
-  <h2>What the July run proves, and what it does not</h2>
-  <p>It proves the control plane held under one full official run on the synthetic eval set: 23 of 23 check tasks, 17 of 17 verify tasks and 32 of 32 plan tasks reached a terminal state, with zero lost and zero dead-lettered, and failure-injection tests FI-1 to FI-7 were green. A bounds check of the audit log found no reference to the answer-key file in any agent tool payload for the run.</p>
-  <p>It does not prove the detector is accurate enough: it failed its precision gate. It does not prove the adjudicator adds precision, because on this run it rejected nothing. And the idempotent re-run is shown by a unit test, not by repeating this run.</p>
+  <h2>What the repair changed</h2>
+  <p>After the 2026-11-02 review, a repair program covered ten defects. The fixes that mattered most: the page reader now returns every text block; violation and compliance excerpts must appear on the page; a task that does not cover every rule is rejected; failed or missing results count as misses instead of going unscored; the verifier must run at its pinned version; agent calls have time limits; and page content is marked as data, not instructions.</p>
+  <p>Those fixes are shown by code and by regression tests (<a href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/blob/ef46410cf5c4c1787b5f9489085fe7a7af8d8792/tests/test_p2_repairs.py">test_p2_repairs.py</a>, <a href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/blob/ef46410cf5c4c1787b5f9489085fe7a7af8d8792/tests/test_run_eval.py">test_run_eval.py</a>; defect list in <a href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/blob/ef46410cf5c4c1787b5f9489085fe7a7af8d8792/STATE.md">STATE.md</a>), and that test suite was one of the 52 November checks. The November scores are a separate outcome, measured against the new gate. No measurement isolates what each fix contributed, because other things changed too (see the scope notes above).</p>
+</section>
+
+<section>
+  <h2>What the evidence proves, and what it does not</h2>
+  <p>The November series shows the complete system meeting a gate set before the run. It does not show 30 of 30, perfect accuracy, production readiness or legal compliance, and each scenario was scored on a decision chosen in advance, which does not show the system can screen a whole page. The adjudicator's value also remains unproven: it rejected no finding in either official run.</p>
+  <p>The July run proves the control plane held under one full official run on the synthetic eval set: 23 of 23 check tasks, 17 of 17 verify tasks and 32 of 32 plan tasks reached a terminal state, with zero lost and zero dead-lettered, and failure-injection tests FI-1 to FI-7 were green. A bounds check of the audit log found no reference to the answer-key file in any agent tool payload for the run.</p>
+  <p>It did not prove the detector accurate enough: it failed its precision gate. The idempotent re-run is shown by a unit test, not by repeating the run.</p>
   <div class="limits">
     <h3 class="mono">KNOWN LIMITATIONS, SELF-DECLARED</h3>
     <ul>
       <li>Rules are synthetic, modelled on public regulatory themes. The system demonstrates the governance pattern.</li>
-      <li>The answer key was split across actors (spec and key: Claude; pages: Claude Code; blind labels: ChatGPT; adjudication: Kristian), which removes key-authorship leakage. The page author still knows what it planted, and pages, key and checkers share a model family.</li>
+      <li>The July answer key was split across actors (spec and key: Claude; pages: Claude Code; blind labels: ChatGPT; adjudication: Kristian), which removes key-authorship leakage. The page author still knows what it planted, and pages, key and checkers share a model family.</li>
       <li>Checker and verifier share a model. Adjudication guards against per-finding error, not model-family blind spots.</li>
-      <li>Counts per jurisdiction are small (MLT 7, GBR 13, DEU 10 violations). At recall &ge; 0.90, MLT tolerates zero misses before failing; GBR and DEU tolerate one each.</li>
+      <li>July counts per jurisdiction are small (MLT 7, GBR 13, DEU 10 violations). At recall &ge; 0.90, MLT tolerates zero misses before failing; GBR and DEU tolerate one each.</li>
+      <li>November pages and the draft key were written by fresh Claude contexts, the same model family as the checker, isolated by instruction. Blind labels came from a different model family.</li>
     </ul>
   </div>
 </section>
@@ -258,8 +242,10 @@
     <span class="t mono">ADR 0001: DETERMINISTIC CONTROL PLANE · ACCEPTED 2026-07-07</span>
     <p>The orchestrator (task ledger, state machine, schema checks, dead-letter routing, resume from the ledger, severity ranking) is deterministic Python, and no model call starts in the control plane. Agents analyse and recommend; they never decide what runs next, a payload's severity, or whether a task is done. The trade-off is recorded: the system cannot adapt its routing to what an agent says. The build proves orchestration discipline, not routing intelligence.</p>
   </div>
-  <p style="margin-top:18px">On 2026-07-09 Kristian decided to publish the FAIL as the final v1.0 result, with no re-run in that cycle. The optional remediation pass left open that day has since run. Its cap of one re-gate was withdrawn on 2026-11-02, and its one official series under the new gate is the November result above.</p>
-  <p>Built with Claude coding agents, which are named as co-authors in the commit history. Kristian adjudicated the July answer key and decided to publish the FAIL.</p>
+  <p style="margin-top:18px">On 2026-07-09 Kristian decided to publish the FAIL as the final v1.0 result, with no re-run in that cycle. The optional remediation pass left open that day has since run. Its cap of one re-gate was withdrawn on 2026-11-02, and its one official series under the new gate is the November result above (<a href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/blob/91105ca/STATE.md">STATE.md at 91105ca</a>).</p>
+  <p>Built with Claude coding agents, which are named as co-authors in the commit history. Decisions were Kristian's: opening the repair program, raising the evaluation level from the proposed Light to Standard, approving gate v2 and the revised rule text, and authorizing each phase and the one official series. Verification came from the committed gate and test suite, and from Kristian's adjudication of the July answer key and the answers where an independent model's labels disagreed with the draft key.</p>
+  <p>Across both evaluations the work follows one pattern: bound the agents, set the test before seeing the result, publish what happens, and repair from the evidence.</p>
+  <p>Next recorded step: examine why <span class="mono">h2-22</span> failed. That test set is now retired to development data, so any later version needs a fresh one.</p>
   <div class="cta">
     <a class="btn pri" href="https://github.com/kobescak-kristian/ai-compliance-orchestrator/blob/main/evals/EVAL_RESULTS.md">Read the full run record in the repo &rarr;</a>
     <a class="btn sec" href="../index.html#engines">All the systems</a>
@@ -269,7 +255,7 @@
 </main>
 
 <footer>
-  <div class="wrap">KRISTIAN KOBESCAK · CASE STUDY · SOURCE OF EVERY NUMBER: evals/EVAL_RESULTS.md · evals/eval_config.yaml IN THE PUBLIC REPO</div>
+  <div class="wrap">KRISTIAN KOBESCAK · CASE STUDY · SOURCE OF EVERY NUMBER: evals/EVAL_RESULTS.md · evals/eval_config.yaml · STATE.md IN THE PUBLIC REPO</div>
   <div class="wrap" style="margin-top:14px">THIS SITE COUNTS VISITS WITH <a href="https://www.goatcounter.com/help/privacy" style="text-decoration:none">GOATCOUNTER</a> · NO COOKIES · NO VISITOR PROFILES · IP ADDRESSES NOT STORED</div>
 </footer>
 
