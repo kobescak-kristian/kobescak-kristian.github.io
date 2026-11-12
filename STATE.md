@@ -1,42 +1,17 @@
 # STATE — kobescak-kristian.github.io
 
-**Classification:** PROJECT · T0 (static public portfolio site, served from GitHub Pages — `AGENTS.md`; `domains/github-ops/CONVENTIONS.md` PROJECT/SYSTEM/EXPERIMENT taxonomy).
+- STATUS: DORMANT
+  No work in progress; true as of 2026-11-12; updated when work resumes.
 
-**RECONSTRUCTED** (GOVERNANCE.md Build-repo STATE rule, clause 7): derived from git history at scaffold time (2026-09-19), not written contemporaneously. Reconstructed entries are retrospective evidence, not contemporaneous record — the commit that adds this file begins the contemporaneous record going forward.
+## Status
 
-## Current state
+Static site served by GitHub Pages from `main`. Structure: README.md. Changes: git history.
 
-Live static site (`index.html` + `case-studies/`), eight case studies shipped, one per public portfolio repository except ai-portfolio-sentinel (AI Reliability Engine, AI Context Engine, AI Impact Scoring Engine, AI Compliance Orchestrator, AI Execution Engine, AI Decision Engine, AI Claim Verification Agent, AI Claim Verification on LangGraph), each linked from `index.html`; below them, four n8n workflow cards that link to their public repositories (no case studies); one decision record (`adr/ADR-001-static-single-file-on-github-pages.md`).
+## Latest result
 
-The homepage runs systems → reference architecture → method → experience. `ai-compliance-orchestrator` leads as portfolio/hiring flagship and `ai-portfolio-sentinel` follows with its bounded status ("in development toward production-ready"); the featured set is the six systems of the governance repository's ADR-2026-09-21 §4; since 2026-11-06 the orchestrator comes first and Sentinel second, and the rest keep their order. The original five-engine diagram is retained only as a labelled reference architecture and is explicitly not presented as one integrated runtime. `ai-reliability-engine` remains a linked case study and is not labelled flagship on any site surface; `ai-decision-engine` remains linked. The Tier-1 documentation flagship designation is unaffected by anything on this site — it lives in `ARTIFACT_STANDARD.md` and still sits on `ai-reliability-engine`.
+None: this repository has no eval gate.
 
-## Build history (from `git log --reverse`, oldest → newest)
+## Open
 
-- **2026-07-07** (`284a73f`, `1d64fa7`) — Site v1 shipped (content from an evidence-passed landing-page draft, agent block gated); Tier 0 artifacts added (README, ADR-001).
-- **2026-07-08** (`8e60684`, `726b9d7`, `96edc8e`) — Flagship case study with evidence-backed stats and OG image, verified-at chip labels; Google Search Console verification token; case study #2 (AI Context Engine's failed-gate run) published.
-- **2026-07-10** (`25157dc`) — Agent card shipped once the repo went public and its link was verified.
-- **2026-07-11** (`d86f418`) — CLAUDE.md: session boot + publish-gate discipline.
-- **2026-07-13** (`c6bc5ab`, `5bbd54c`) — Automation work section streamlined; engagement-availability note added.
-- **2026-07-14** (`c06c187`, `1139ab8`) — Dead PDF-pipeline card removed; AI Compliance Orchestrator card shipped with honest-FAIL framing (gate run `gate-9328e564`).
-- **2026-07-20** (`a4c9f06`) — Case study #3 (AI Impact Scoring Engine's ledger reconciliation) published, pinned at `b127fc4`.
-- **2026-07-24** (`69ae28e`) — Canonical pre-commit local-path guard added.
-- **2026-08-03** (`82f19ab`) — Publish-gate coverage canary added.
-- **2026-08-04** (`8f786e2`, `bf1fbe6`, `5439d8d`) — Internal references redacted (entry-exact allowlist); Apache-2.0 license added; pre-push hook installed with the validator call left disabled ("no validator yet" — accurate at the time, no local validator file existed until the next entry).
-- **2026-09-16** (`de66cad`) — Canonical AGENTS.md router adopted; this is also when `.githooks/validate_artifacts.py` was first added — the pre-push comment from `5439d8d` was not revisited at that point.
-- **2026-09-19** (`5078243`) — STATE.md added (this file); validator gains a STATE.md-existence check; the pre-push validator call, dormant since before the validator file existed, is enabled.
-- **2026-09-22** (`664ea27`) — `portfolio-site-refresh-a`: site brought into line with the governance repository's ADR-2026-09-21 (portfolio positioning and flagship separation). Sentinel leads as portfolio flagship with bounded status; six-system featured hierarchy adopted; the "one decision system, five engines / not five demos — one pipeline" framing removed and the diagram relabelled as reference architecture; metadata, hero and method copy rewritten off the adopted positioning, dropping the portfolio-wide wording retired in the marketing record the same week; the 2026-07-07 page-audit PASS badge replaced with neutral dated wording; Reliability-specific hero stats folded back into the Reliability card; the five engine hash chips relabelled as dated July audit anchors rather than current HEADs; the claim-verification card now states that its published evaluation is confounded by case-name hints and does not present its scores as blind accuracy evidence.
-- **2026-09-22** (this commit) — Case-study navigation aligned to the current site narrative: the two remaining obsolete five-engine CTA labels, on the AI Context Engine and AI Impact Scoring Engine case studies, replaced with "All the systems" — the wording already shipped on the AI Reliability Engine case study. Text only; the `../index.html#engines` targets are unchanged.
-
-- **2026-10-12 to 2026-10-13** (`39983ef`, `9a3f6de`, `bf346d7`, `f53fec2`, `f04a2a9`, `6c828ae`): case-study series under one written standard. The three existing case studies gained an AI-use line (the reliability page also a result line, a synthetic-data disclosure and a proves paragraph); five new case studies published (AI Compliance Orchestrator, AI Execution Engine, AI Decision Engine, AI Claim Verification Agent, AI Claim Verification on LangGraph), each with every number re-derived from the described repository at a pinned commit and an independent review before merge. The claim-verification card's confound caution was replaced by the 2026-10-13 neutral-name re-run result; the LangGraph rebuild is linked from that card, not given its own card (Kristian's decision, 2026-10-13). Each of the five repositories' GitHub homepage field now points to its case study.
-- **2026-10-13** (`f7a2f23`): homepage cosmetics on request: hero label "MALTA / REMOTE" replaced with "AI EVALUATION"; reference-architecture stage text set to block layout so each description starts under its title; footer note "SINGLE STATIC FILE · NO TRACKING" removed (the site still carries no tracking; adding analytics needs a decision record per `AGENTS.md`).
-
-- **2026-10-16** (`c74d850`, PR 10): visitor counting decided and added. `adr/ADR-002-visitor-measurement.md` (Accepted; live checks passed, next entry) records Kristian's choice of GoatCounter, cookieless, no consent banner, with the residual EU consent risk accepted in writing; the counter script and a one-line footer note are on every public page; `README.md`, `AGENTS.md` and the status line of ADR-001 now point to ADR-002.
-- **2026-10-16** (live checks for ADR-002, after the `c74d850` Pages build): all 9 public pages return 200 and serve the counter script and the footer note (`curl` plus `grep`, 2 matches per page); a browser visit to `/?campaign=livecheck` sent the count request to the site's GoatCounter endpoint, with no cookie, localStorage or sessionStorage entry on the site; neither `count.js` nor the count endpoint returned a Set-Cookie header; Kristian confirmed the visit and the "livecheck" campaign in the GoatCounter dashboard. "livecheck" is a test visit, not a visitor.
-- **2026-10-16** (`1caed3a`): homepage card links on request. Every card link carried `margin-top:auto`, so in a card taller than its content the spare height was split between the links (measured at 1280 px wide: 50 px gaps on the compliance orchestrator card, 25 px on the execution engine card, 38 px on the decision engine card, 12 px elsewhere). Only the first link now takes the auto margin; on every card the links sit 12 px apart, pinned to the card bottom. CSS only, one rule; no text, link or claim changed.
-
-- **2026-11-06** (`4d46f89`): AI Compliance Orchestrator leads the portfolio with its gate v2.1 result, with figures from that repository at `ef46410`. Homepage hero, flagship card and evaluation block updated; Sentinel in second place, with its status from that repository's STATE; the case study opens with the November result. Four n8n workflow cards added, each linked to its public repository, with figures from their READMEs at b63f8f8, 0896119, 03dbf7e and e8d07c6. Homepage wording and five case-study headlines now lead with capability and results.
-- **2026-11-08** (this commit): AI Compliance Orchestrator case study corrected against that repository at `ef46410`. November run and recording commits separated and pinned links added; July causes corrected, with the pattern table replaced by a short account; legal-accuracy disclaimer restored; comparison with July stated; short repair section, role line, November time and notional cost, and one next step added.
-
-## Open loops
-
-None. The previously open sixth-repository dark card was already discharged in build history — the claim-verification agent card shipped `25157dc` (2026-07-10) and the compliance orchestrator card shipped `1139ab8` (2026-07-14). Only the README's "ships dark" note lagged; it is removed in the 2026-09-22 commit.
+- Deferred: review of the visitor counter by 2027-10-16, or earlier on a trigger in ADR-002, "Review".
+- Next: none scheduled.
