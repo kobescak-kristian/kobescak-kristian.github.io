@@ -26,6 +26,8 @@ status are mutable public content. They live in the HTML, in `README.md`
 and in the external source repositories, and are deliberately not
 restated here.
 
+Classification: PROJECT.
+
 ## Authority and conflict handling
 
 | Question | Canonical source |
@@ -91,6 +93,11 @@ These are starting points, not exhaustive reading lists.
 - Pinned evidence must stay traceable. Case studies and homepage claims
   cite commit hashes and other evidence anchors; do not casually replace,
   re-point or reinterpret one.
+- The GitHub homepage field of each repository with a case study links to
+  its page in `case-studies/`; renaming or moving a case-study file breaks
+  that link.
+- The ADR-002 live checks and the earlier build history are in
+  `git show 0aeba56:STATE.md`.
 - Never rewrite pushed history. The site and its case studies depend on
   hash-stable public repositories and on this repository's auditable
   history. No amend, rebase or force-push of already-pushed commits.
