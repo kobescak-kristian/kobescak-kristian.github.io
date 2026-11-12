@@ -1,0 +1,6 @@
+exclude:
+  - STATE.md
+  - AGENTS.md
+  - CLAUDE.md
+  - README.md
+  - adr/
