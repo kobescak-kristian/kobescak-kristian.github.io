@@ -39,7 +39,6 @@ Classification: PROJECT.
 | Claude session mechanics for this repository | `CLAUDE.md` |
 | Machine-local absolute path guard at write time | `.githooks/pre-commit` |
 | Push freshness guard | `.githooks/pre-push` |
-| Adjudicated, entry-exact publication exceptions | `.publicgate-allow` |
 | The technical fact behind a repository claim shown on the site | the linked public source repository at its cited commit |
 | Licence terms | `LICENSE` |
 
@@ -69,7 +68,6 @@ These are starting points, not exhaustive reading lists.
 | Static-site architecture or deployment decision | `adr/ADR-001-static-single-file-on-github-pages.md` |
 | Visitor measurement | `adr/ADR-002-visitor-measurement.md` |
 | Evidence behind a repository claim | the linked or pinned public source repository, read together with the site HTML that makes the claim |
-| Publication exception for an otherwise-blocked line | `.publicgate-allow` |
 | Machine-local path guard | `.githooks/pre-commit` |
 | Push freshness | `.githooks/pre-push` |
 | Artifact validation | `.githooks/validate_artifacts.py` |
@@ -107,8 +105,7 @@ These are starting points, not exhaustive reading lists.
   diff, rerun the gate.
 - No credentials, private operational data, machine-local absolute paths
   or private internal documentation content may be newly introduced into
-  public files. The existing exceptions are exact entries in
-  `.publicgate-allow`; do not broaden them casually.
+  public files.
 - Any edit that changes a factual repository or system claim must be
   re-derived from the authoritative public source before publication, not
   from memory and not from an earlier value on the page.

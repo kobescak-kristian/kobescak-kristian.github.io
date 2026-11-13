@@ -2,14 +2,7 @@
 
 @AGENTS.md
 
-## Session boot and governance (applies to every session here)
-- Governance home: kristian-os (PRINCIPLES -> GOVERNANCE ->
-  FAILURE_REGISTER). Read before any irreversible action.
-- Before any write: environment fingerprint (pwd + git config
-  user.email; /home/user/ or noreply@anthropic.com = cloud
-  sandbox = read-only, no pen). Pen check on main at open AND
-  pre-commit.
-- Close ritual: commit -> push origin main -> verify
-  origin/main..HEAD empty -> report verbatim.
-- Work comes from the governance repo's queue (kristian-os) and
-  its webpage queue; do not invent tasks.
+## Session mechanics (Claude-specific)
+- Boot: read STATE.md before writing to this tree.
+- Environment fingerprint before any write (pwd + git config user.email).
+- Close: commit on a branch -> push the branch -> open a PR to main -> merge after CI passes.
