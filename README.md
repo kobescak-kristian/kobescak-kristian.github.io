@@ -40,7 +40,6 @@ public and its link verified.
 Featured, in the order the homepage presents them:
 
 - [ai-compliance-orchestrator](https://github.com/kobescak-kristian/ai-compliance-orchestrator) — portfolio flagship
-- [ai-portfolio-sentinel](https://github.com/kobescak-kristian/ai-portfolio-sentinel) — advanced system; status: in development toward production-ready
 - [ai-claim-verification-agent](https://github.com/kobescak-kristian/ai-claim-verification-agent) — advanced system
 - [ai-context-engine](https://github.com/kobescak-kristian/ai-context-engine) — business-workflow capability
 - [ai-execution-engine](https://github.com/kobescak-kristian/ai-execution-engine) — business-workflow capability

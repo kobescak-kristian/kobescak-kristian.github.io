@@ -365,13 +365,6 @@
       </article>
 
       <article class="card rv">
-        <div class="top"><span class="flag mono">ADVANCED SYSTEM</span><span class="hash">in development toward production-ready</span></div>
-        <h3>AI Portfolio Sentinel</h3>
-        <p>A scheduled monitor over my own public repositories. It derives the repository inventory live from the GitHub API, runs deterministic checks over it — link liveness, README-to-eval number consistency, required-file presence — dedupes findings against a persistent SQLite ledger, and hands two judgment classes to a caged single-tool agent. Read-only on everything it monitors, holding no credentials for any of it. Scheduled runs are paused during qualification for unattended operation.</p>
-        <a class="go mono" href="https://github.com/kobescak-kristian/ai-portfolio-sentinel">github.com/kobescak-kristian/ai-portfolio-sentinel <span>→</span></a>
-      </article>
-
-      <article class="card rv">
         <div class="top"><span class="flag mono">ADVANCED SYSTEM</span><span class="hash">eval-05fbe4ee · re-run eval-199f77c6</span></div>
         <h3>AI Claim Verification Agent</h3>
         <p>A bounded agent that checks a page's factual claims against source pages. Four read-only tools and nothing else, a 20-turn cap, a per-run cost ceiling, and a SQLite audit trail written before each tool result reaches the model. On a synthetic evaluation of 12 cases and 35 claims, run with neutral case names, it scored precision 1.00 and recall 1.00, 35 of 35. Rebuilt on LangGraph to test whether its limits survive a framework change, it gave the same score, with the cost ceiling hand-built because the framework has no limit in money.</p>
@@ -396,7 +389,7 @@
         <a class="go mono" href="https://github.com/kobescak-kristian/ai-execution-engine" style="padding-top:2px">github.com/kobescak-kristian/ai-execution-engine <span>→</span></a>
       </article>
 
-      <article class="card rv" id="c-impact" style="grid-column:1 / -1">
+      <article class="card rv" id="c-impact">
         <div class="top"><span class="flag mono">WORKFLOW CAPABILITY</span><span class="hash">audited 2026-07 @ 17c4fdb</span></div>
         <h3>AI Impact Scoring Engine</h3>
         <p>Attaches financial impact to lead-routing decisions, so threshold changes become cost decisions instead of guesses. Its figures come from a simulated 75-lead dataset built to produce both positive and negative outcomes.</p>
@@ -530,7 +523,7 @@
       <li class="rv">
         <div class="role display">Independent — AI systems &amp; operations</div>
         <div class="org mono">PUBLIC AI PORTFOLIO · ON GITHUB</div>
-        <p>Designed and shipped a set of independent public repositories — a multi-jurisdiction compliance orchestrator, a portfolio monitor, a bounded verification agent, and five workflow engines — sharing a way of working rather than a runtime: deterministic control planes, bounded model roles, eval thresholds committed ahead of the run, architecture decision records, and pre-push validation hooks. Also delivered client automation work — data extraction and document-generation pipelines.</p>
+        <p>Designed and shipped a set of independent public repositories — a multi-jurisdiction compliance orchestrator, a bounded verification agent, and five workflow engines — sharing a way of working rather than a runtime: deterministic control planes, bounded model roles, eval thresholds committed ahead of the run, architecture decision records, and pre-push validation hooks. Also delivered client automation work — data extraction and document-generation pipelines.</p>
         <div class="pill-row">
           <span class="pill">Bounded agents</span><span class="pill">Eval gates</span><span class="pill">Audit trails</span><span class="pill">ADRs</span>
         </div>
