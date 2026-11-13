@@ -31,7 +31,7 @@ readme = ROOT / "README.md"
 if not readme.exists():
     errors.append("README.md missing")
 
-# Build-repo STATE rule (GOVERNANCE.md): required in every repo, no
+# Build-repo STATE rule: required in every repo, no
 # PROJECT/SYSTEM/EXPERIMENT exemption.
 state = ROOT / "STATE.md"
 if not state.exists():
