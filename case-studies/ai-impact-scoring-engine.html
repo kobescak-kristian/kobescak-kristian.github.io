@@ -119,7 +119,7 @@
 <section>
   <h2>The problem</h2>
   <p>The AI Impact Scoring Engine prices AI routing decisions: revenue won, cost of wasted sales effort, revenue lost to missed leads. Its entire pitch is deterministic, auditable financial numbers — the scoring is rule-based and runs before any AI call, so the same input always produces the same figure, and the LLM can only narrate numbers it is handed, never invent them (ADR-0001, committed in the repo).</p>
-  <p>A system that sells auditability has to survive being audited. So it was — from its public HEAD, by a separate model session instructed to be hostile: fresh clone, quickstart on a default Windows console, all five API endpoints exercised live, aggregate math reconciled against per-lead outputs.</p>
+  <p>A system that sells auditability has to survive being audited. So it was — from its public HEAD, by an independent review (a separate AI session set up to look for failures): fresh clone, quickstart on a default Windows console, all five API endpoints exercised live, aggregate math reconciled against per-lead outputs.</p>
 </section>
 
 <section>
@@ -143,7 +143,7 @@
 
 <section>
   <h2>The fixes, in public history</h2>
-  <p>Two remediation commits, both in the open history and dated in the README version log. The accounting decision (gross-revenue entry, penalty counted once) was made by Kristian; the fixes were implemented in-session and re-verified from a fresh public clone on 2026-07-06 before the record closed (the fix trail is public).</p>
+  <p>Two remediation commits, both in the open history and dated in the README version log. The accounting decision (gross-revenue entry, penalty counted once) was made by Kristian; the fixes were then made and re-verified from a fresh public clone on 2026-07-06 before the record closed (the fix trail is public).</p>
   <table>
     <thead><tr><th>Commit</th><th>What it fixed</th></tr></thead>
     <tbody>
