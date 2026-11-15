@@ -1,7 +1,9 @@
 # kobescak-kristian.github.io
 
 Personal site of Kristian Kobescak — operations practitioner turning
-business workflows into controlled AI-assisted systems.
+workflows into controlled AI-assisted systems.
+
+**Status:** Built, 2026-11.
 
 **Live:** https://kobescak-kristian.github.io
 
@@ -57,3 +59,7 @@ n8n workflow automations:
 - [n8n-ai-output-guard](https://github.com/kobescak-kristian/n8n-ai-output-guard)
 - [n8n-ai-support-bot](https://github.com/kobescak-kristian/n8n-ai-support-bot)
 - [n8n-data-sync](https://github.com/kobescak-kristian/n8n-data-sync)
+
+## License
+
+Apache License 2.0. See [LICENSE](LICENSE).
