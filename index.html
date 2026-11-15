@@ -339,11 +339,6 @@
       <a class="btn pri" href="case-studies/ai-compliance-orchestrator.html">View the portfolio flagship →</a>
       <a class="btn sec" href="#engines">See the systems</a>
     </div>
-    <div class="verdict mono" role="text" aria-label="Page content status">
-      <span>content</span>
-      <span>repository claims re-derived from their public repositories</span>
-      <span>2026-09-22</span>
-    </div>
   </header>
 
   <!-- ══ SYSTEMS ═══════════════════════════════════════ -->
@@ -356,7 +351,7 @@
 
     <div class="cards">
       <article class="card rv" style="grid-column:1 / -1">
-        <div class="top"><span class="flag mono">PORTFOLIO FLAGSHIP</span><span class="hash">gate v2.1 PASS · series H2-2026-11-05-a7871a</span></div>
+        <div class="top"><span class="flag mono">PORTFOLIO FLAGSHIP</span><span class="hash">Evaluation passed · Nov 2026</span></div>
         <h3>AI Compliance Orchestrator</h3>
         <p>Reviews gambling-site content against rule sets for three jurisdictions: one bounded checker agent per jurisdiction, a deterministic control plane, every step logged, and a human approving every change. In its latest official evaluation it passed gate v2.1 on a private test set, with 29 of 30 synthetic scenarios passed in all 3 runs and 52 of 52 deterministic checks passed. It reuses the claim-verification agent, unmodified, as its adjudicator. It runs on synthetic rule sets modelled on regulatory themes. The test pages are private by design; sanitized results and a hash manifest are public.</p>
         <a class="go mono" href="case-studies/ai-compliance-orchestrator.html" style="color:var(--stamp)">Read the case study <span>→</span></a>
@@ -365,7 +360,7 @@
       </article>
 
       <article class="card rv">
-        <div class="top"><span class="flag mono">ADVANCED SYSTEM</span><span class="hash">eval-05fbe4ee · re-run eval-199f77c6</span></div>
+        <div class="top"><span class="flag mono">ADVANCED SYSTEM</span><span class="hash">Evaluated · re-run Oct 2026</span></div>
         <h3>AI Claim Verification Agent</h3>
         <p>A bounded agent that checks a page's factual claims against source pages. Four read-only tools and nothing else, a 20-turn cap, a per-run cost ceiling, and a SQLite audit trail written before each tool result reaches the model. On a synthetic evaluation of 12 cases and 35 claims, run with neutral case names, it scored precision 1.00 and recall 1.00, 35 of 35. Rebuilt on LangGraph to test whether its limits survive a framework change, it gave the same score, with the cost ceiling hand-built because the framework has no limit in money.</p>
         <a class="go mono" href="case-studies/ai-claim-verification-agent.html" style="color:var(--stamp)">Read the case study <span>→</span></a>
@@ -374,7 +369,7 @@
       </article>
 
       <article class="card rv" id="c-context">
-        <div class="top"><span class="flag mono">WORKFLOW CAPABILITY</span><span class="hash">audited 2026-07 @ 8ad6e07</span></div>
+        <div class="top"><span class="flag mono">WORKFLOW CAPABILITY</span><span class="hash">Audited · July 2026</span></div>
         <h3>AI Context Engine</h3>
         <p>Retrieval-grounded decision support: retrieved precedent, a validated decision with risk flags, and the full chain persisted for audit. Its keyed eval run scored 58/75 against a 69/75 bar fixed before the run, with the miss pattern analysed in EVAL_RESULTS.md.</p>
         <a class="go mono" href="case-studies/ai-context-engine.html" style="color:var(--stamp)">Read the case study <span>→</span></a>
@@ -382,7 +377,7 @@
       </article>
 
       <article class="card rv" id="c-execution">
-        <div class="top"><span class="flag mono">WORKFLOW CAPABILITY</span><span class="hash">audited 2026-07 @ 19285cf</span></div>
+        <div class="top"><span class="flag mono">WORKFLOW CAPABILITY</span><span class="hash">Audited · July 2026</span></div>
         <h3>AI Execution Engine</h3>
         <p>A deterministic CRM lead workflow: normalisation across three source types, score-based routing into five named queues, full stage history per lead, and a bounded agent that reads the resulting metrics and proposes changes without modifying any workflow state.</p>
         <a class="go mono" href="case-studies/ai-execution-engine.html" style="color:var(--stamp)">Read the case study <span>→</span></a>
@@ -390,7 +385,7 @@
       </article>
 
       <article class="card rv" id="c-impact">
-        <div class="top"><span class="flag mono">WORKFLOW CAPABILITY</span><span class="hash">audited 2026-07 @ 17c4fdb</span></div>
+        <div class="top"><span class="flag mono">WORKFLOW CAPABILITY</span><span class="hash">Audited · July 2026</span></div>
         <h3>AI Impact Scoring Engine</h3>
         <p>Attaches financial impact to lead-routing decisions, so threshold changes become cost decisions instead of guesses. Its figures come from a simulated 75-lead dataset built to produce both positive and negative outcomes.</p>
         <a class="go mono" href="case-studies/ai-impact-scoring-engine.html" style="color:var(--stamp)">Read the case study <span>→</span></a>
@@ -402,14 +397,14 @@
 
     <div class="cards" style="margin-top:18px">
       <article class="card rv" id="c-reliability">
-        <div class="top"><span></span><span class="hash">audited 2026-07 @ ddff88b</span></div>
+        <div class="top"><span></span><span class="hash">Audited · July 2026</span></div>
         <h3>AI Reliability Engine</h3>
         <p>Blocks invalid AI outputs before they trigger business actions: schema and value validation, retry and safe-default logic, confidence-threshold routing, SQLite persistence. Its committed run records 51 records in, 7 failures caught and routed to safe defaults, and no invalid output reaching a downstream system.</p>
         <a class="go mono" href="case-studies/ai-reliability-engine.html" style="color:var(--stamp)">Read the case study <span>→</span></a>
         <a class="go mono" href="https://github.com/kobescak-kristian/ai-reliability-engine" style="padding-top:2px">github.com/kobescak-kristian/ai-reliability-engine <span>→</span></a>
       </article>
       <article class="card rv" id="c-decision">
-        <div class="top"><span></span><span class="hash">audited 2026-07 @ f1546c2</span></div>
+        <div class="top"><span></span><span class="hash">Audited · July 2026</span></div>
         <h3>AI Decision Engine</h3>
         <p>Records the original decision, accepts the real-world outcome later, and evaluates decision quality over time — the feedback layer that tells you whether the calls were right, not just whether they ran.</p>
         <a class="go mono" href="case-studies/ai-decision-engine.html" style="color:var(--stamp)">Read the case study <span>→</span></a>
@@ -421,25 +416,25 @@
 
     <div class="cards" style="margin-top:18px">
       <article class="card rv" id="c-n8n-lead">
-        <div class="top"><span class="flag mono">N8N WORKFLOW</span><span class="hash">re-derived 2026-11-03 @ b63f8f8</span></div>
+        <div class="top"><span class="flag mono">N8N WORKFLOW</span><span class="hash">Facts checked · Nov 2026</span></div>
         <h3>n8n AI Lead Qualifier</h3>
         <p>Checks, researches and scores every new lead with Claude, sends clear good fits to HubSpot, and asks a person in Slack before anything uncertain reaches the CRM or a prospect's inbox. In the final test, 88 of 89 AI-scored leads were routed as expected in all 3 runs (29 of 30 on sealed leads the workflow was never tuned on), and no reply was sent without a person's approval.</p>
         <a class="go mono" href="https://github.com/kobescak-kristian/n8n-ai-lead-qualifier">github.com/kobescak-kristian/n8n-ai-lead-qualifier <span>→</span></a>
       </article>
       <article class="card rv" id="c-n8n-guard">
-        <div class="top"><span class="flag mono">N8N WORKFLOW</span><span class="hash">re-derived 2026-11-03 @ 0896119</span></div>
+        <div class="top"><span class="flag mono">N8N WORKFLOW</span><span class="hash">Facts checked · Nov 2026</span></div>
         <h3>n8n AI Output Guard</h3>
         <p>A reusable sub-workflow that checks every AI answer before the workflow uses it: a JSON Schema check, one retry that tells the AI what was wrong, a fallback, and a person in Slack for anything still invalid. Tested on a broken claims workflow (89 claim cases, 3 gated runs): adding the guard took crashes from 26 to 0 and bad rows saved from 42 to 0. It checks format, not truth.</p>
         <a class="go mono" href="https://github.com/kobescak-kristian/n8n-ai-output-guard">github.com/kobescak-kristian/n8n-ai-output-guard <span>→</span></a>
       </article>
       <article class="card rv" id="c-n8n-support">
-        <div class="top"><span class="flag mono">N8N WORKFLOW</span><span class="hash">re-derived 2026-11-03 @ 03dbf7e</span></div>
+        <div class="top"><span class="flag mono">N8N WORKFLOW</span><span class="hash">Facts checked · Nov 2026</span></div>
         <h3>n8n AI Support Bot</h3>
         <p>Answers customers only from the business's own help articles, names the article it used, and says it does not know instead of guessing. Code, not AI, checks every price, number, e-mail and link in a reply before it is sent; customers who ask for a person, and questions about order, payment or refund status, complaints and safety issues, go to a person in Slack. Across 3 runs of 235 made-up conversations, 128 of them written by a separate writer who never saw the bot: 0 critical failures, 131 of 133 normal questions right in all 3 runs, $0.00022 AI cost per customer message.</p>
         <a class="go mono" href="https://github.com/kobescak-kristian/n8n-ai-support-bot">github.com/kobescak-kristian/n8n-ai-support-bot <span>→</span></a>
       </article>
       <article class="card rv" id="c-n8n-sync">
-        <div class="top"><span class="flag mono">N8N WORKFLOW</span><span class="hash">re-derived 2026-11-03 @ e8d07c6</span></div>
+        <div class="top"><span class="flag mono">N8N WORKFLOW</span><span class="hash">Facts checked · Nov 2026</span></div>
         <h3>n8n Data Sync</h3>
         <p>Copies WooCommerce orders into HubSpot with no AI step: every field is checked before any write, one contact per e-mail and one deal per order number, and orders it cannot sync go to a person in Slack with a replay step (the exceptions are listed in its README). 110 of 110 made-up order cases right in each of 3 runs (34 of them hidden until those runs), with 0 breaks of its 5 hard rules (right values, no duplicates, nothing bad written, nothing lost or silent, good data kept).</p>
         <a class="go mono" href="https://github.com/kobescak-kristian/n8n-data-sync">github.com/kobescak-kristian/n8n-data-sync <span>→</span></a>
