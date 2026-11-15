@@ -1,6 +1,6 @@
 # kobescak-kristian.github.io
 
-Personal site of Kristian Kobescak — operations practitioner turning
+Personal site of Kristian Kobescak, operations practitioner turning
 workflows into controlled AI-assisted systems.
 
 **Status:** Built, 2026-11.
